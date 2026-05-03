@@ -279,7 +279,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
           <div class="field-label" style="margin:0">Prompt siap pakai</div>
           <button class="sec-btn" style="font-size:11px" onclick="copyActive()" data-tip="Copy output ini">Copy</button>
         </div>
-        <div class="output-box" id="outputBox">Prompt yang di-generate akan muncul di sini.</div>
+        <textarea class="output-box" id="outputBox" style="resize:vertical;min-height:200px;flex:1" spellcheck="false">Prompt yang di-generate akan muncul di sini.</textarea>
         <div class="output-meta" id="outputMeta"></div>
       </div>
     </div>
@@ -843,7 +843,7 @@ function generatePrompt(){
     else{const c=compilePrompt();sys=c.system;usr=c.user;}
 
     const output=document.getElementById('outputBox');
-    output.textContent=(sys?'[SYSTEM]\n'+sys+'\n\n':'')+'[USER]\n'+usr;
+    output.value=(sys?'[SYSTEM]\n'+sys+'\n\n':'')+'[USER]\n'+usr;
 
     const total=(sys.length+usr.length).toLocaleString();
     document.getElementById('outputMeta').innerHTML=
@@ -882,7 +882,7 @@ function copyActive(){
     const {system,user}=compilePrompt();
     text=(system?'[SYSTEM]\n'+system+'\n\n':'')+'[USER]\n'+user;
   } else if(currentTab==='output'){
-    text=document.getElementById('outputBox').textContent;
+    text=document.getElementById('outputBox').value;
   } else {
     const {system,user}=compilePrompt();
     text=(system?'[SYSTEM]\n'+system+'\n\n':'')+'[USER]\n'+user;
@@ -903,7 +903,7 @@ function resetAll(){
   document.getElementById('domainTag').innerHTML='';
   document.getElementById('questionsArea').classList.remove('show');
   document.getElementById('aiNotice').style.display='none';
-  document.getElementById('outputBox').textContent='Prompt yang di-generate akan muncul di sini.';
+  document.getElementById('outputBox').value='Prompt yang di-generate akan muncul di sini.';
   document.getElementById('outputMeta').innerHTML='';
   document.getElementById('previewBox').textContent='Preview akan update otomatis saat kamu edit...';
   // FIX #6: reset compose fields
