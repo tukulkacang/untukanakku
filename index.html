@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Builder — Smart AI Prompt Generator</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #161616;
+    --bg3: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #e8e6e0;
+    --text2: #8a8880;
+    --text3: #5a5856;
+    --accent: #c8a96e;
+    --accent2: #a08040;
+    --blue: #5b9bd5;
+    --teal: #4db89a;
+    --coral: #d4614a;
+    --purple: #8b7dd8;
+    --green: #6aaa5a;
+    --amber: #d4923a;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    padding: 20px 24px 16px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #0f0f0f;
+    flex-shrink: 0;
+  }
+  .header-title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .header-badge {
+    margin-left: auto;
+    font-size: 10px; padding: 3px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--accent2);
+    color: var(--accent);
+    letter-spacing: .04em;
+  }
+
+  /* LAYOUT */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    height: calc(100vh - 65px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 0.5px solid var(--border);
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 8px;
+  }
+
+  /* TEMPLATES */
+  .tmpl-btn {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0.5px solid transparent;
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--text);
+  }
+  .tmpl-btn:hover { background: var(--bg3); border-color: var(--border); }
+  .tmpl-btn.active { background: var(--bg3); border-color: var(--border2); }
+  .tmpl-btn .t-icon { font-size: 16px; display: block; margin-bottom: 4px; }
+  .tmpl-btn .t-name { font-size: 12px; font-weight: 600; display: block; color: var(--text); }
+  .tmpl-btn .t-desc { font-size: 11px; color: var(--text2); display: block; margin-top: 1px; }
+
+  /* BLOCKS */
+  .blocks-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+  .block-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--text2);
+    background: transparent;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .block-chip:hover { border-color: var(--border2); color: var(--text); }
+  .block-chip .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+  /* VARS */
+  .var-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 5px; margin-bottom: 5px; align-items: center; }
+  .var-row input {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text);
+    width: 100%;
+  }
+  .var-row input:focus { outline: none; border-color: var(--border2); }
+  .del-btn {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .del-btn:hover { background: rgba(212,97,74,.15); color: var(--coral); border-color: rgba(212,97,74,.3); }
+  .add-var-btn {
+    font-size: 11px; color: var(--blue);
+    background: none; border: none; cursor: pointer;
+    padding: 4px 0; text-align: left;
+  }
+  .add-var-btn:hover { text-decoration: underline; }
+
+  /* MAIN */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* INTENT BAR */
+  .intent-bar {
+    padding: 16px 20px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .intent-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .intent-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: var(--font);
+    color: var(--text);
+    resize: none;
+    transition: border-color .15s;
+    line-height: 1.5;
+  }
+  .intent-input:focus { outline: none; border-color: var(--border2); }
+  .intent-input::placeholder { color: var(--text3); }
+  .detect-btn {
+    padding: 10px 18px;
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+    white-space: nowrap;
+    align-self: stretch;
+  }
+  .detect-btn:hover { opacity: .88; }
+  .domain-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    min-height: 20px;
+  }
+
+  /* QUESTIONS */
+  .questions-area {
+    padding: 12px 20px;
+    border-bottom: 0.5px solid var(--border);
+    display: none;
+  }
+  .questions-area.show { display: block; }
+  .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .q-item {}
+  .q-label { font-size: 11px; color: var(--text2); margin-bottom: 5px; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
+  .q-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--text2);
+    background: transparent;
+  }
+  .q-chip:hover { border-color: var(--border2); color: var(--text); }
+  .q-chip.sel { border-color: var(--accent2); color: var(--accent); background: rgba(200,169,110,.08); }
+  .q-text {
+    width: 100%;
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: var(--font);
+    color: var(--text);
+    resize: none;
+  }
+  .q-text:focus { outline: none; border-color: var(--border2); }
+
+  /* EDITOR */
+  .editor-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 20px;
+    gap: 0;
+  }
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all .15s;
+    margin-bottom: -0.5px;
+  }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-pane { display: none; flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .tab-pane.show { display: flex; flex-direction: column; gap: 12px; }
+
+  /* FORM FIELDS */
+  .field-label {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .field-badge {
+    font-size: 9px; padding: 1px 6px;
+    border-radius: 10px;
+    background: rgba(200,169,110,.15);
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+  textarea.field, select.field, input.field {
+    width: 100%;
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: var(--mono);
+    color: var(--text);
+    resize: vertical;
+    transition: border-color .15s;
+    line-height: 1.6;
+  }
+  textarea.field:focus, select.field:focus, input.field:focus {
+    outline: none;
+    border-color: var(--border2);
+  }
+  select.field { font-family: var(--font); cursor: pointer; }
+
+  .config-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .config-item label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; }
+
+  /* PREVIEW */
+  .preview-box {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    font-size: 12px;
+    font-family: var(--mono);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text2);
+    flex: 1;
+  }
+  .preview-sys { color: var(--blue); }
+  .preview-usr { color: var(--text); }
+
+  /* OUTPUT */
+  .output-box {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    font-size: 13px;
+    font-family: var(--mono);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    flex: 1;
+    min-height: 100px;
+  }
+  .output-meta {
+    display: flex; align-items: center; gap: 8px; margin-top: 8px;
+    font-size: 11px; color: var(--text3);
+  }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    padding: 12px 20px;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg2);
+  }
+  .char-badge {
+    font-size: 11px; color: var(--text3);
+    font-family: var(--mono);
+    margin-right: auto;
+  }
+  .gen-btn {
+    padding: 9px 20px;
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .gen-btn:hover { opacity: .88; }
+  .gen-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .sec-btn {
+    padding: 9px 14px;
+    background: transparent;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .sec-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .q-grid { grid-template-columns: 1fr; }
+    .config-row { grid-template-columns: 1fr; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="logo">P</div>
+  <div>
+    <div class="header-title">Prompt Builder</div>
+    <div class="header-sub">Smart AI prompt generator — ketik singkat, dapat prompt tajam</div>
+  </div>
+  <div class="header-badge">v2.0</div>
+</header>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div>
+      <div class="section-label">Templates</div>
+      <div id="tmplGrid" style="display:flex;flex-direction:column;gap:3px"></div>
+    </div>
+    <div>
+      <div class="section-label">Insert block</div>
+      <div class="blocks-wrap" id="blockChips"></div>
+    </div>
+    <div style="flex:1">
+      <div class="section-label">Variables</div>
+      <div id="varRows"></div>
+      <button class="add-var-btn" onclick="addVar()">+ Tambah variabel</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- INTENT BAR -->
+    <div class="intent-bar">
+      <div class="intent-wrap">
+        <textarea class="intent-input" id="intentInput" rows="2"
+          placeholder="Ketik singkat apa yang mau kamu buat... contoh: bikin aplikasi manajemen tugas, lagu pop tentang hujan, artikel tentang AI"
+          oninput="onIntentInput(this.value)"></textarea>
+        <button class="detect-btn" onclick="detectAndShow()">Generate →</button>
+      </div>
+      <div id="domainTag"></div>
+    </div>
+
+    <!-- QUESTIONS -->
+    <div class="questions-area" id="questionsArea">
+      <div class="q-grid" id="questionsGrid"></div>
+    </div>
+
+    <!-- EDITOR TABS -->
+    <div class="editor-area">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('compose',this)">Compose</button>
+        <button class="tab-btn" onclick="switchTab('preview',this)">Preview</button>
+        <button class="tab-btn" onclick="switchTab('output',this)">Output</button>
+      </div>
+
+      <!-- COMPOSE -->
+      <div class="tab-pane show" id="tab-compose">
+        <div>
+          <div class="field-label">System prompt <span class="field-badge">SYSTEM</span></div>
+          <textarea class="field" id="systemPrompt" rows="3" placeholder="You are a..."></textarea>
+        </div>
+        <div class="config-row">
+          <div class="config-item">
+            <label>Format output</label>
+            <select class="field" id="outputFormat">
+              <option>Plain text</option><option>Markdown</option><option>JSON</option>
+              <option>Kode saja</option><option>Step-by-step</option><option>Tabel</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>Tone</label>
+            <select class="field" id="tone">
+              <option>Professional</option><option>Santai</option><option>Teknikal</option>
+              <option>Ringkas</option><option>Detail</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>Reasoning</label>
+            <select class="field" id="reasoning">
+              <option>Standard</option><option>Think step by step</option>
+              <option>Chain of thought</option><option>Pros &amp; cons</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">User prompt</div>
+          <textarea class="field" id="userPrompt" rows="4" placeholder="Deskripsi tugas. Gunakan {{variabel}} untuk bagian dinamis..."></textarea>
+        </div>
+        <div>
+          <div class="field-label">Konteks / contoh <span style="color:var(--text3);font-size:10px">(opsional)</span></div>
+          <textarea class="field" id="contextPrompt" rows="2" placeholder="Background info, few-shot examples..."></textarea>
+        </div>
+        <div>
+          <div class="field-label">Constraints</div>
+          <textarea class="field" id="constraintPrompt" rows="2" placeholder="Maks 200 kata. Selalu sertakan contoh kode..."></textarea>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="tab-pane" id="tab-preview">
+        <div class="preview-box" id="previewBox">Klik "Preview" untuk lihat compiled prompt...</div>
+      </div>
+
+      <!-- OUTPUT -->
+      <div class="tab-pane" id="tab-output">
+        <div class="output-box" id="outputBox">Prompt yang sudah di-generate akan muncul di sini.</div>
+        <div class="output-meta">
+          <span id="outputMeta"></span>
+          <button class="sec-btn" id="copyOutBtn" onclick="copyOutput()" style="display:none;margin-left:auto">Copy output</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="bottom-bar">
+      <span class="char-badge" id="charBadge">0 chars</span>
+      <button class="sec-btn" onclick="resetAll()">Reset</button>
+      <button class="sec-btn" onclick="copyPrompt()">Copy prompt</button>
+      <button class="gen-btn" id="genBtn" onclick="generatePrompt()">⚡ Generate prompt</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TEMPLATES = [
+  { icon:'💻', name:'App / Software', desc:'Bangun aplikasi dari scratch',
+    sys:'Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun.',
+    user:'Bantu saya membuat {{deskripsi_app}}.\n\nTech stack: {{stack}}\nTarget pengguna: {{target_user}}\nScope: {{scope}}',
+    context:'', constraints:'Berikan: breakdown fitur, arsitektur, struktur folder, langkah implementasi bertahap. Sertakan contoh kode.',
+    format:'Markdown', tone:'Teknikal', reasoning:'Think step by step',
+    vars:[{k:'deskripsi_app',v:'aplikasi to-do list'},{k:'stack',v:'React + Node.js'},{k:'target_user',v:'umum'},{k:'scope',v:'MVP'}] },
+  { icon:'📝', name:'Artikel / Blog', desc:'Konten tulisan berkualitas',
+    sys:'Kamu adalah content writer profesional dengan kemampuan riset mendalam dan gaya menulis yang engaging.',
+    user:'Tulis artikel tentang {{topik}}.\n\nTarget pembaca: {{pembaca}}\nSudut pandang: {{angle}}',
+    context:'', constraints:'Gunakan active voice. Sertakan contoh konkret. Opening hook yang kuat. Hindari basa-basi.',
+    format:'Markdown', tone:'Professional', reasoning:'Standard',
+    vars:[{k:'topik',v:'kecerdasan buatan'},{k:'pembaca',v:'pemula'},{k:'angle',v:'dampak di kehidupan sehari-hari'}] },
+  { icon:'🎵', name:'Lagu / Lirik', desc:'Struktur dan lirik lagu',
+    sys:'Kamu adalah songwriter profesional yang sudah menulis untuk artis-artis top. Ahli dalam struktur lagu, imagery lirik, dan emosi musikal.',
+    user:'Buat {{output_type}} untuk lagu {{genre}} tentang {{tema}}.\n\nMood: {{mood}}\nPesan utama: {{pesan}}',
+    context:'', constraints:'Struktur jelas (verse/chorus/bridge). Imagery kuat, bukan klise. Hook yang mudah diingat.',
+    format:'Plain text', tone:'Detail', reasoning:'Standard',
+    vars:[{k:'output_type',v:'full lirik'},{k:'genre',v:'pop'},{k:'tema',v:'perpisahan'},{k:'mood',v:'melankolis'},{k:'pesan',v:''}] },
+  { icon:'🎬', name:'Video / Script', desc:'Naskah konten video',
+    sys:'Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton.',
+    user:'Buat script video {{style}} tentang {{topik}} untuk {{platform}}.\n\nDurasi: {{durasi}}',
+    context:'', constraints:'Hook kuat 5 detik pertama. Sertakan visual cues. Closing + CTA yang natural.',
+    format:'Plain text', tone:'Santai', reasoning:'Standard',
+    vars:[{k:'style',v:'edukatif'},{k:'topik',v:'tips produktivitas'},{k:'platform',v:'YouTube'},{k:'durasi',v:'5-10 menit'}] },
+  { icon:'✨', name:'Blank Canvas', desc:'Mulai dari nol',
+    sys:'', user:'', context:'', constraints:'',
+    format:'Plain text', tone:'Professional', reasoning:'Standard', vars:[] },
+];
+
+const BLOCKS = [
+  { label:'Role', color:'#4db89a', text:'Kamu adalah {{role}} dengan keahlian di {{domain}}. ' },
+  { label:'Context', color:'#5b9bd5', text:'\n\nKonteks: {{latar_belakang}}' },
+  { label:'Task', color:'#d4614a', text:'\n\nTugas kamu: {{deskripsi_tugas}}' },
+  { label:'Format', color:'#d4923a', text:'\n\nRespond dalam format {{format}}. Gunakan {{struktur}}.' },
+  { label:'Example', color:'#8b7dd8', text:'\n\nContoh:\nInput: {{contoh_input}}\nOutput: {{contoh_output}}' },
+  { label:'COT', color:'#6aaa5a', text:'\n\nThink step by step sebelum menjawab.' },
+  { label:'JSON', color:'#8a8880', text:'\n\nRespond HANYA dengan valid JSON: {"result": ..., "reason": ...}' },
+  { label:'Batasan', color:'#d4614a', text:'\n\nBatasan: {{batasan_spesifik}}' },
+];
+
+const DOMAINS = {
+  app:     { kw:['aplikasi','app','website','web','sistem','platform','fitur','dashboard','tool','software','crud','api','backend','frontend','mobile','landing page','saas','bot','game','toko','marketplace'],
+             label:'Aplikasi / Software', color:'#5b9bd5', bg:'rgba(91,155,213,.12)',
+             qs:[{id:'stack',q:'Tech stack?',type:'chip',opts:['React','Vue','Next.js','Flutter','React Native','Laravel','Node.js','Python','Bebas']},
+                 {id:'user',q:'Target pengguna?',type:'chip',opts:['Developer','End user umum','Tim internal','Admin','Bebas']},
+                 {id:'scope',q:'Skala?',type:'chip',opts:['MVP','Produksi penuh','Prototype','PoC']},
+                 {id:'detail',q:'Detail tambahan?',type:'text',ph:'Fitur utama, constraint...'}] },
+  artikel: { kw:['artikel','blog','post','tulisan','konten','essay','review','listicle','berita'],
+             label:'Artikel / Konten', color:'#4db89a', bg:'rgba(77,184,154,.12)',
+             qs:[{id:'audience',q:'Untuk siapa?',type:'chip',opts:['Pemula','Profesional','Developer','Umum','Pelajar']},
+                 {id:'tone',q:'Tone tulisan?',type:'chip',opts:['Santai','Formal','Edukatif','Persuasif','Storytelling']},
+                 {id:'length',q:'Panjang?',type:'chip',opts:['Pendek (300-500 kata)','Sedang (700-1000 kata)','Panjang (1500+ kata)']},
+                 {id:'detail',q:'Angle / sudut pandang?',type:'text',ph:'Fokus pada...'}] },
+  lagu:    { kw:['lagu','musik','lirik','lyric','song','chord','melodi','rap','pop','rock','jazz','indie','nasyid'],
+             label:'Lagu / Musik', color:'#8b7dd8', bg:'rgba(139,125,216,.12)',
+             qs:[{id:'genre',q:'Genre?',type:'chip',opts:['Pop','R&B','Rock','Indie','Jazz','Folk','Hip-hop','Bebas']},
+                 {id:'mood',q:'Mood?',type:'chip',opts:['Sedih','Bahagia','Romantis','Energik','Melankolis','Spiritual']},
+                 {id:'output',q:'Yang dibutuhin?',type:'chip',opts:['Full lirik','Struktur lagu','Chord & lirik','Konsep saja']},
+                 {id:'detail',q:'Cerita / pesan utama?',type:'text',ph:'Tentang seseorang yang...'}] },
+  video:   { kw:['video','youtube','script','naskah','vlog','reels','tiktok','short','dokumenter','tutorial video'],
+             label:'Video / Script', color:'#d4614a', bg:'rgba(212,97,74,.12)',
+             qs:[{id:'platform',q:'Platform?',type:'chip',opts:['YouTube','TikTok','Instagram Reels','Presentasi','Iklan']},
+                 {id:'duration',q:'Durasi?',type:'chip',opts:['< 1 menit','1-5 menit','5-15 menit','15+ menit']},
+                 {id:'style',q:'Style?',type:'chip',opts:['Edukatif','Hiburan','Storytelling','Tutorial','Motivasi']},
+                 {id:'detail',q:'Hook / CTA khusus?',type:'text',ph:''}] },
+  desain:  { kw:['desain','design','ui','ux','wireframe','mockup','logo','branding','poster','banner','figma'],
+             label:'Desain / UI', color:'#d4923a', bg:'rgba(212,146,58,.12)',
+             qs:[{id:'type',q:'Jenis?',type:'chip',opts:['UI/UX App','Wireframe','Branding','Poster','Infografis']},
+                 {id:'style',q:'Gaya visual?',type:'chip',opts:['Minimalis','Modern','Playful','Corporate','Retro']},
+                 {id:'tool',q:'Tool?',type:'chip',opts:['Figma','Adobe XD','Canva','Sketch','Bebas']},
+                 {id:'detail',q:'Referensi / detail?',type:'text',ph:'Warna brand, inspirasi...'}] },
+  umum:    { kw:[], label:'Umum', color:'#8a8880', bg:'rgba(138,136,128,.12)',
+             qs:[{id:'goal',q:'Tujuan?',type:'chip',opts:['Buat dari nol','Improve yang ada','Riset','Jelaskan konsep']},
+                 {id:'output',q:'Format output?',type:'chip',opts:['Teks/paragraf','List/poin','Kode','Tabel','Bebas']},
+                 {id:'detail',q:'Konteks tambahan?',type:'text',ph:'Semakin detail semakin presisi...'}] },
+};
+
+let vars = [], answers = {}, activeDomain = null, currentTab = 'compose';
+
+function init() {
+  // templates
+  const tg = document.getElementById('tmplGrid');
+  TEMPLATES.forEach((t,i) => {
+    const b = document.createElement('button');
+    b.className = 'tmpl-btn' + (i===0?' active':'');
+    b.innerHTML = `<span class="t-icon">${t.icon}</span><span class="t-name">${t.name}</span><span class="t-desc">${t.desc}</span>`;
+    b.onclick = () => loadTemplate(i, b);
+    tg.appendChild(b);
+  });
+  // blocks
+  const bc = document.getElementById('blockChips');
+  BLOCKS.forEach(bl => {
+    const c = document.createElement('button');
+    c.className = 'block-chip';
+    c.innerHTML = `<span class="dot" style="background:${bl.color}"></span>${bl.label}`;
+    c.onclick = () => insertBlock(bl.text);
+    bc.appendChild(c);
+  });
+  loadTemplate(0, document.querySelector('.tmpl-btn'));
+  setupListeners();
+}
+
+function setupListeners() {
+  ['systemPrompt','userPrompt','contextPrompt','constraintPrompt'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateCharCount);
+  });
+}
+
+function loadTemplate(i, btn) {
+  document.querySelectorAll('.tmpl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const t = TEMPLATES[i];
+  document.getElementById('systemPrompt').value = t.sys;
+  document.getElementById('userPrompt').value = t.user;
+  document.getElementById('contextPrompt').value = t.context;
+  document.getElementById('constraintPrompt').value = t.constraints;
+  document.getElementById('outputFormat').value = t.format;
+  document.getElementById('tone').value = t.tone;
+  document.getElementById('reasoning').value = t.reasoning;
+  vars = t.vars.map(v => ({...v}));
+  renderVars();
+  updateCharCount();
+}
+
+function insertBlock(text) {
+  const ta = document.getElementById('userPrompt');
+  const pos = ta.selectionStart || ta.value.length;
+  ta.value = ta.value.slice(0,pos) + text + ta.value.slice(pos);
+  ta.focus();
+  updateCharCount();
+}
+
+function renderVars() {
+  const c = document.getElementById('varRows');
+  c.innerHTML = '';
+  vars.forEach((v,i) => {
+    const row = document.createElement('div');
+    row.className = 'var-row';
+    row.innerHTML = `
+      <input value="${v.k}" placeholder="nama_var" oninput="vars[${i}].k=this.value" style="font-family:var(--mono)">
+      <input value="${v.v}" placeholder="nilai" oninput="vars[${i}].v=this.value">
+      <button class="del-btn" onclick="removeVar(${i})">×</button>`;
+    c.appendChild(row);
+  });
+}
+
+function addVar() { vars.push({k:'var_baru',v:''}); renderVars(); }
+function removeVar(i) { vars.splice(i,1); renderVars(); }
+
+function detectDomain(text) {
+  const t = text.toLowerCase();
+  for (const [k, d] of Object.entries(DOMAINS)) {
+    if (k === 'umum') continue;
+    if (d.kw.some(kw => t.includes(kw))) return k;
+  }
+  return 'umum';
+}
+
+function onIntentInput(val) {
+  if (!val.trim()) {
+    document.getElementById('domainTag').innerHTML = '';
+    return;
+  }
+  const dk = detectDomain(val);
+  const d = DOMAINS[dk];
+  document.getElementById('domainTag').innerHTML =
+    `<span class="domain-tag" style="background:${d.bg};color:${d.color}">⚡ Terdeteksi: ${d.label}</span>`;
+}
+
+function detectAndShow() {
+  const val = document.getElementById('intentInput').value.trim();
+  if (!val) { alert('Tulis dulu apa yang mau kamu buat!'); return; }
+  activeDomain = detectDomain(val);
+  answers = {};
+  renderQuestions(activeDomain);
+  document.getElementById('questionsArea').classList.add('show');
+  generatePrompt();
+}
+
+function renderQuestions(dk) {
+  const d = DOMAINS[dk];
+  const grid = document.getElementById('questionsGrid');
+  grid.innerHTML = '';
+  d.qs.forEach(q => {
+    const div = document.createElement('div');
+    div.className = 'q-item';
+    if (q.type === 'chip') {
+      div.innerHTML = `<div class="q-label">${q.q}</div><div class="chip-row" id="cr-${q.id}"></div>`;
+      grid.appendChild(div);
+      const row = div.querySelector('.chip-row');
+      q.opts.forEach(opt => {
+        const c = document.createElement('button');
+        c.className = 'q-chip';
+        c.textContent = opt;
+        c.onclick = () => {
+          row.querySelectorAll('.q-chip').forEach(x => x.classList.remove('sel'));
+          c.classList.add('sel');
+          answers[q.id] = opt;
+        };
+        row.appendChild(c);
+      });
+    } else {
+      div.innerHTML = `<div class="q-label">${q.q}</div><textarea class="q-text" rows="2" placeholder="${q.ph||''}" oninput="answers['${q.id}']=this.value"></textarea>`;
+      grid.appendChild(div);
+    }
+  });
+}
+
+function compilePrompt() {
+  let sys = document.getElementById('systemPrompt').value;
+  let user = document.getElementById('userPrompt').value;
+  let ctx = document.getElementById('contextPrompt').value;
+  let cons = document.getElementById('constraintPrompt').value;
+  const fmt = document.getElementById('outputFormat').value;
+  const tone = document.getElementById('tone').value;
+  const reasoning = document.getElementById('reasoning').value;
+
+  vars.forEach(v => {
+    if (!v.k) return;
+    const re = new RegExp('\\{\\{' + v.k + '\\}\\}', 'g');
+    sys = sys.replace(re, v.v);
+    user = user.replace(re, v.v);
+    ctx = ctx.replace(re, v.v);
+    cons = cons.replace(re, v.v);
+  });
+
+  if (tone !== 'Professional') sys += (sys ? '\n\n' : '') + `Tone: ${tone}.`;
+  if (reasoning !== 'Standard') sys += '\n\n' + (
+    reasoning === 'Think step by step' ? 'Think step by step sebelum menjawab.' :
+    reasoning === 'Chain of thought' ? 'Tunjukkan chain of thought sebelum jawaban final.' :
+    'Paparkan pros dan cons sebelum menyimpulkan.');
+  if (fmt !== 'Plain text') sys += `\n\nFormat respons: ${fmt}.`;
+  if (cons) sys += '\n\nBatasan:\n' + cons;
+
+  let fullUser = user;
+  if (ctx) fullUser += '\n\nKonteks:\n' + ctx;
+
+  return { system: sys.trim(), user: fullUser.trim() };
+}
+
+function updateCharCount() {
+  const { system, user } = compilePrompt();
+  document.getElementById('charBadge').textContent = (system.length + user.length).toLocaleString() + ' chars';
+}
+
+function switchTab(name, btn) {
+  currentTab = name;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show'));
+  document.getElementById('tab-' + name).classList.add('show');
+  if (name === 'preview') renderPreview();
+}
+
+function renderPreview() {
+  const { system, user } = compilePrompt();
+  let html = '';
+  if (system) html += `<span class="preview-sys">[SYSTEM]\n${esc(system)}</span>\n\n`;
+  html += `<span class="preview-usr">[USER]\n${esc(user)}</span>`;
+  document.getElementById('previewBox').innerHTML = html;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildSmartPrompt() {
+  const intent = document.getElementById('intentInput').value.trim();
+  if (!intent || !activeDomain) return null;
+  const d = DOMAINS[activeDomain];
+  const ans = answers;
+  const dk = activeDomain;
+
+  if (dk === 'app') {
+    const stack = ans.stack || 'bebas';
+    const user = ans.user || 'end user umum';
+    const scope = ans.scope || 'MVP';
+    const detail = ans.detail || '';
+    return {
+      system: `Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun membangun aplikasi production-grade.`,
+      user: `Tugas kamu: Bantu saya membuat ${intent}.\n\nSpesifikasi teknis:\n- Tech stack: ${stack}\n- Target pengguna: ${user}\n- Scope: ${scope}${detail ? '\n- Detail: ' + detail : ''}\n\nYang saya butuhkan:\n1. Breakdown fitur utama (core features) yang wajib ada\n2. Arsitektur sistem yang direkomendasikan\n3. Struktur folder / project yang rapi\n4. Komponen / modul utama beserta fungsinya\n5. Langkah implementasi bertahap (dari yang paling kritikal)\n6. Potensi challenge teknis dan cara mengatasinya\n\nBerikan jawaban konkret, langsung bisa dieksekusi. Sertakan contoh kode jika relevan.`
+    };
+  }
+  if (dk === 'artikel') {
+    const audience = ans.audience || 'pembaca umum';
+    const tone = ans.tone || 'santai';
+    const length = ans.length || 'sedang';
+    const detail = ans.detail || '';
+    return {
+      system: `Kamu adalah content writer dan journalist profesional dengan kemampuan riset mendalam dan gaya menulis yang engaging.`,
+      user: `Tugas kamu: Tulis artikel tentang ${intent}.\n\nParameter:\n- Target pembaca: ${audience}\n- Tone: ${tone}\n- Panjang: ${length}${detail ? '\n- Angle: ' + detail : ''}\n\nStruktur:\n1. Headline menarik dan tidak clickbait\n2. Opening hook yang langsung menarik pembaca\n3. Isi dengan subheading jelas, mengalir secara logis\n4. Data atau contoh konkret di setiap poin\n5. Penutup kuat dengan takeaway\n\nHindari basa-basi. Gunakan active voice.`
+    };
+  }
+  if (dk === 'lagu') {
+    const genre = ans.genre || 'pop';
+    const mood = ans.mood || 'bebas';
+    const output = ans.output || 'full lirik';
+    const detail = ans.detail || '';
+    return {
+      system: `Kamu adalah songwriter profesional yang sudah menulis untuk artis-artis top. Ahli dalam struktur lagu, imagery lirik, dan emosi musikal.`,
+      user: `Tugas kamu: Buat ${output} untuk lagu ${genre} tentang ${intent}.\n\nSpesifikasi:\n- Genre: ${genre}\n- Mood: ${mood}${detail ? '\n- Cerita/pesan: ' + detail : ''}\n\nYang harus kamu hasilkan:\n- Struktur lagu jelas (verse 1 / pre-chorus / chorus / verse 2 / bridge / outro)\n- Lirik dengan imagery kuat, bukan klise\n- Hook chorus yang mudah diingat\n- Konsistensi tema dan emosi dari awal hingga akhir\n- (Opsional) Petunjuk melodi atau feel musiknya`
+    };
+  }
+  if (dk === 'video') {
+    const platform = ans.platform || 'YouTube';
+    const duration = ans.duration || '5-15 menit';
+    const style = ans.style || 'edukatif';
+    const detail = ans.detail || '';
+    return {
+      system: `Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton dan algoritma platform.`,
+      user: `Tugas kamu: Buat script video ${style} tentang ${intent} untuk ${platform}.\n\nSpesifikasi:\n- Platform: ${platform}\n- Durasi target: ${duration}\n- Style: ${style}${detail ? '\n- Detail: ' + detail : ''}\n\nFormat script:\n1. Hook kuat di 5 detik pertama\n2. Opening yang establish topik dengan jelas\n3. Isi dengan struktur mengalir + transisi smooth\n4. Visual cues / direction\n5. Closing kuat + CTA natural\n6. Estimasi durasi per bagian`
+    };
+  }
+  if (dk === 'desain') {
+    const type = ans.type || 'UI/UX';
+    const style = ans.style || 'modern';
+    const tool = ans.tool || 'Figma';
+    const detail = ans.detail || '';
+    return {
+      system: `Kamu adalah senior UI/UX designer dengan portofolio produk digital top. Memahami design thinking, user psychology, dan estetika visual.`,
+      user: `Tugas kamu: Bantu saya mendesain ${intent}.\n\nSpesifikasi:\n- Jenis: ${type}\n- Gaya visual: ${style}\n- Tool: ${tool}${detail ? '\n- Detail: ' + detail : ''}\n\nYang dibutuhkan:\n1. Konsep visual dan design direction\n2. Color palette (dengan hex code)\n3. Typography pairing\n4. Layout utama dan hierarki informasi\n5. Komponen UI key yang perlu dibuat\n6. Panduan konsistensi (spacing, radius, shadow)`
+    };
+  }
+  // umum
+  const goal = ans.goal || 'buat dari nol';
+  const output = ans.output || 'bebas';
+  const detail = ans.detail || '';
+  return {
+    system: `Kamu adalah expert di bidang yang relevan dengan tugas berikut. Berikan jawaban yang presisi, terstruktur, dan langsung bisa digunakan.`,
+    user: `Tugas: ${intent}\n\nKonteks:\n- Tujuan: ${goal}\n- Format output: ${output}${detail ? '\n- Info tambahan: ' + detail : ''}\n\nInstruksi:\n1. Pahami apa yang benar-benar dibutuhkan\n2. Jawaban komprehensif namun tidak bertele-tele\n3. Struktur jelas — heading atau poin jika membantu\n4. Sertakan contoh konkret\n5. Sebutkan asumsi yang kamu buat`
+  };
+}
+
+function generatePrompt() {
+  const smart = buildSmartPrompt();
+  let { system, user } = smart || compilePrompt();
+
+  const output = document.getElementById('outputBox');
+  output.textContent = (system ? '[SYSTEM]\n' + system + '\n\n' : '') + '[USER]\n' + user;
+
+  document.getElementById('outputMeta').textContent = `${(system.length + user.length).toLocaleString()} chars total`;
+  document.getElementById('copyOutBtn').style.display = '';
+
+  switchTab('output', document.querySelectorAll('.tab-btn')[2]);
+}
+
+function copyPrompt() {
+  const { system, user } = compilePrompt();
+  const text = (system ? '[SYSTEM]\n' + system + '\n\n' : '') + '[USER]\n' + user;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy prompt', 1500);
+  });
+}
+
+function copyOutput() {
+  const text = document.getElementById('outputBox').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyOutBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy output', 1500);
+  });
+}
+
+function resetAll() {
+  document.getElementById('intentInput').value = '';
+  document.getElementById('domainTag').innerHTML = '';
+  document.getElementById('questionsArea').classList.remove('show');
+  document.getElementById('outputBox').textContent = 'Prompt yang sudah di-generate akan muncul di sini.';
+  document.getElementById('outputMeta').textContent = '';
+  document.getElementById('copyOutBtn').style.display = 'none';
+  activeDomain = null;
+  answers = {};
+}
+
+init();
+</script>
+</body>
+</html>
