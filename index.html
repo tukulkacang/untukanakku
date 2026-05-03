@@ -297,31 +297,144 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
 <script>
 // ── TEMPLATES ──
 const TEMPLATES = [
-  { icon:'💻', name:'App / Software', desc:'Bangun aplikasi dari scratch',
-    sys:'Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun.',
+  // ── DEV ──
+  { icon:'💻', name:'App / Software', desc:'Bangun aplikasi dari scratch', cat:'dev',
+    sys:'Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun membangun aplikasi production-grade.',
     user:'Bantu saya membuat {{deskripsi_app}}.\n\nTech stack: {{stack}}\nTarget pengguna: {{target_user}}\nScope: {{scope}}',
-    ctx:'', cons:'Berikan: breakdown fitur, arsitektur, struktur folder, langkah implementasi. Sertakan contoh kode.',
+    ctx:'', cons:'Berikan: breakdown fitur, arsitektur, struktur folder, langkah implementasi bertahap. Sertakan contoh kode nyata.',
     format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
     vars:[{k:'deskripsi_app',v:'aplikasi to-do list'},{k:'stack',v:'React + Node.js'},{k:'target_user',v:'umum'},{k:'scope',v:'MVP'}] },
-  { icon:'📝', name:'Artikel / Blog', desc:'Konten tulisan berkualitas',
-    sys:'Kamu adalah content writer profesional dengan kemampuan riset mendalam.',
-    user:'Tulis artikel tentang {{topik}}.\n\nTarget pembaca: {{pembaca}}\nSudut pandang: {{angle}}',
-    ctx:'', cons:'Active voice. Sertakan contoh konkret. Opening hook kuat. Hindari basa-basi.',
+  { icon:'🐛', name:'Debug & Review', desc:'Diagnosa bug & code review', cat:'dev',
+    sys:'Kamu adalah expert debugger dan code reviewer. Analisis error secara sistematis, cari root cause bukan symptom. Berikan fix yang benar-benar bekerja.',
+    user:'Error yang saya hadapi:\n```\n{{error_message}}\n```\n\nKode bermasalah:\n```{{bahasa}}\n{{kode}}\n```\n\nEkspektasi: {{ekspektasi}}',
+    ctx:'Environment: {{environment}}', cons:'Jelaskan KENAPA error terjadi. Berikan fix exact. Sebutkan edge case.',
+    format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
+    vars:[{k:'error_message',v:''},{k:'bahasa',v:'javascript'},{k:'kode',v:''},{k:'ekspektasi',v:''},{k:'environment',v:'Node.js 20'}] },
+  { icon:'🧪', name:'Unit Test Generator', desc:'Generate test dari kode', cat:'dev',
+    sys:'Kamu adalah senior QA engineer spesialis test-driven development. Tulis test yang comprehensive, meaningful, bukan hanya coverage.',
+    user:'Buatkan unit test untuk kode berikut:\n\n```{{bahasa}}\n{{kode}}\n```\n\nFramework test: {{framework}}\nFokus: {{fokus_test}}',
+    ctx:'', cons:'Cover happy path, edge case, error case. Nama test harus deskriptif. Tambahkan komentar untuk test yang non-obvious.',
+    format:'Kode saja',tone:'Teknikal',reasoning:'Think step by step',
+    vars:[{k:'bahasa',v:'javascript'},{k:'kode',v:''},{k:'framework',v:'Jest'},{k:'fokus_test',v:'semua case'}] },
+  { icon:'📚', name:'Tech Documentation', desc:'Dokumentasi teknis & README', cat:'dev',
+    sys:'Kamu adalah technical writer di perusahaan teknologi top. Tulis dokumentasi yang akurat, jelas, dan developer-friendly.',
+    user:'Tulis {{jenis_doc}} untuk: {{subjek}}\n\nAudience: {{audience}}\nLevel teknis: {{level}}',
+    ctx:'{{konteks_tambahan}}', cons:'Gunakan active voice. Sertakan contoh kode. Struktur dengan heading. Hindari jargon tidak perlu.',
+    format:'Markdown',tone:'Teknikal',reasoning:'Standard',
+    vars:[{k:'jenis_doc',v:'README'},{k:'subjek',v:'REST API authentication'},{k:'audience',v:'developer junior'},{k:'level',v:'intermediate'},{k:'konteks_tambahan',v:''}] },
+  { icon:'🔍', name:'SEO Content', desc:'Konten yang ramah search engine', cat:'dev',
+    sys:'Kamu adalah SEO specialist dan content strategist. Tulis konten yang dioptimasi untuk search engine tanpa mengorbankan kualitas untuk pembaca manusia.',
+    user:'Tulis konten SEO tentang: {{topik}}\n\nKeyword utama: {{keyword}}\nKeyword sekunder: {{keyword_sekunder}}\nPanjang: {{panjang}}',
+    ctx:'Kompetitor: {{kompetitor}}', cons:'Keyword density natural (1-2%). Sertakan meta description. H1/H2/H3 yang logis. Internal link placeholder [LINK].',
     format:'Markdown',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'topik',v:'kecerdasan buatan'},{k:'pembaca',v:'pemula'},{k:'angle',v:'dampak sehari-hari'}] },
-  { icon:'🎵', name:'Lagu / Lirik', desc:'Struktur dan lirik lagu',
-    sys:'Kamu adalah songwriter profesional. Ahli dalam struktur lagu, imagery lirik, dan emosi musikal.',
-    user:'Buat {{output_type}} untuk lagu {{genre}} tentang {{tema}}.\n\nMood: {{mood}}\nPesan utama: {{pesan}}',
-    ctx:'', cons:'Struktur jelas (verse/chorus/bridge). Imagery kuat, bukan klise. Hook mudah diingat.',
+    vars:[{k:'topik',v:''},{k:'keyword',v:''},{k:'keyword_sekunder',v:''},{k:'panjang',v:'1000 kata'},{k:'kompetitor',v:''}] },
+
+  // ── KONTEN ──
+  { icon:'📝', name:'Artikel / Blog', desc:'Konten tulisan berkualitas', cat:'konten',
+    sys:'Kamu adalah content writer dan journalist profesional dengan kemampuan riset mendalam dan gaya menulis yang engaging.',
+    user:'Tulis artikel tentang {{topik}}.\n\nTarget pembaca: {{pembaca}}\nSudut pandang: {{angle}}\nPanjang: {{panjang}}',
+    ctx:'', cons:'Gunakan active voice. Sertakan data atau contoh konkret di setiap poin. Opening hook kuat. Hindari basa-basi di awal.',
+    format:'Markdown',tone:'Professional',reasoning:'Standard',
+    vars:[{k:'topik',v:'kecerdasan buatan'},{k:'pembaca',v:'pemula'},{k:'angle',v:'dampak di kehidupan sehari-hari'},{k:'panjang',v:'700 kata'}] },
+  { icon:'📱', name:'Caption Sosmed', desc:'Caption IG, TikTok, LinkedIn', cat:'konten',
+    sys:'Kamu adalah social media strategist dan copywriter yang paham algoritma dan psikologi engagement di berbagai platform.',
+    user:'Buat caption untuk {{platform}} tentang {{topik}}.\n\nTone: {{tone_caption}}\nCTA: {{cta}}\nHashtag: {{hashtag}}',
+    ctx:'Brand voice: {{brand_voice}}', cons:'Hook di kalimat pertama. Emoji strategis. Buat 3 variasi dengan pendekatan berbeda.',
+    format:'Plain text',tone:'Santai',reasoning:'Standard',
+    vars:[{k:'platform',v:'Instagram'},{k:'topik',v:''},{k:'tone_caption',v:'inspiratif'},{k:'cta',v:'comment di bawah'},{k:'hashtag',v:'ya'},{k:'brand_voice',v:'friendly dan relatable'}] },
+  { icon:'📧', name:'Email Profesional', desc:'Email bisnis yang efektif', cat:'konten',
+    sys:'Kamu adalah komunikator profesional dengan keahlian menulis email bisnis yang persuasif, jelas, dan mendapat respons.',
+    user:'Tulis email {{jenis_email}} kepada {{penerima}}.\n\nTujuan: {{tujuan}}\nTone: {{tone_email}}\nHal penting: {{poin_utama}}',
+    ctx:'Konteks hubungan: {{konteks_hubungan}}', cons:'Subject line menarik. Langsung ke poin dalam 2-3 kalimat pertama. Clear CTA di akhir. Maksimal 200 kata.',
+    format:'Plain text',tone:'Professional',reasoning:'Standard',
+    vars:[{k:'jenis_email',v:'follow-up'},{k:'penerima',v:'klien'},{k:'tujuan',v:''},{k:'tone_email',v:'profesional tapi ramah'},{k:'poin_utama',v:''},{k:'konteks_hubungan',v:''}] },
+  { icon:'🤝', name:'Cold Outreach / Sales', desc:'Pesan pertama yang convert', cat:'konten',
+    sys:'Kamu adalah sales copywriter expert yang paham buyer psychology. Tulis pesan cold outreach yang terasa personal, bukan spam.',
+    user:'Tulis cold outreach untuk {{channel}} kepada {{target_prospek}}.\n\nProduk/layanan: {{produk}}\nValue proposition: {{value_prop}}\nPain point yang diselesaikan: {{pain_point}}',
+    ctx:'', cons:'Jangan langsung jualan di kalimat pertama. Personalisasi wajib. Satu CTA jelas. Maksimal 100 kata untuk pesan pertama.',
+    format:'Plain text',tone:'Santai',reasoning:'Standard',
+    vars:[{k:'channel',v:'LinkedIn'},{k:'target_prospek',v:'startup founder'},{k:'produk',v:''},{k:'value_prop',v:''},{k:'pain_point',v:''}] },
+  { icon:'📖', name:'Cerita Pendek / Fiksi', desc:'Prosa kreatif dan storytelling', cat:'konten',
+    sys:'Kamu adalah penulis fiksi berpengalaman dengan kemampuan membangun dunia, karakter yang believable, dan narasi yang menarik.',
+    user:'Tulis cerita pendek bergenre {{genre}} tentang {{premis}}.\n\nSetting: {{setting}}\nProtagonist: {{karakter_utama}}\nKonflik utama: {{konflik}}\nPanjang: {{panjang}}',
+    ctx:'', cons:'Show, dont tell. Dialogue yang natural. Opening yang langsung menarik. Ending yang berkesan, tidak harus happy ending.',
     format:'Plain text',tone:'Detail',reasoning:'Standard',
-    vars:[{k:'output_type',v:'full lirik'},{k:'genre',v:'pop'},{k:'tema',v:'perpisahan'},{k:'mood',v:'melankolis'},{k:'pesan',v:''}] },
-  { icon:'🎬', name:'Video / Script', desc:'Naskah konten video',
-    sys:'Kamu adalah video content creator dan scriptwriter berpengalaman.',
+    vars:[{k:'genre',v:'drama realistis'},{k:'premis',v:''},{k:'setting',v:''},{k:'karakter_utama',v:''},{k:'konflik',v:''},{k:'panjang',v:'500 kata'}] },
+
+  // ── MUSIK ──
+  { icon:'🎵', name:'Lirik Lagu', desc:'Langsung tulis lirik, bukan cerita', cat:'musik',
+    sys:'Kamu adalah songwriter profesional. Ahli dalam struktur lagu, imagery lirik, dan emosi musikal. PENTING: Langsung tulis liriknya — jangan cerita tentang lagu, jangan penjelasan. Mulai langsung dari Verse 1.',
+    user:'Langsung tulis lirik lagu {{genre}} tentang {{tema}}.\n\nMood: {{mood}}\nBahasa: {{bahasa}}\nPesan/cerita: {{pesan}}\n\nStruktur yang diinginkan: Verse 1 → Pre-Chorus → Chorus → Verse 2 → Bridge → Outro\n\nMULAI SEKARANG DARI VERSE 1:',
+    ctx:'', cons:'DILARANG menulis narasi atau penjelasan sebelum lirik. Langsung mulai dengan [Verse 1]. Imagery kuat, bukan klise. Hook chorus mudah diingat dan diulang.',
+    format:'Plain text',tone:'Detail',reasoning:'Standard',
+    vars:[{k:'genre',v:'pop'},{k:'tema',v:'perpisahan'},{k:'mood',v:'melankolis'},{k:'bahasa',v:'Indonesia'},{k:'pesan',v:''}] },
+  { icon:'🎼', name:'Struktur Lagu', desc:'Konsep & arsitektur musikal', cat:'musik',
+    sys:'Kamu adalah music producer dan arranger profesional. Bantu merancang struktur lagu yang kuat secara musikal.',
+    user:'Rancang struktur lagu {{genre}} tentang {{tema}}.\n\nMood: {{mood}}\nDurasi target: {{durasi}}\nInstrumentasi: {{instrumen}}',
+    ctx:'', cons:'Berikan: peta struktur (bagian + durasi), panduan melodi per section, key/tempo rekomendasi, chord progression dasar, production notes.',
+    format:'Markdown',tone:'Teknikal',reasoning:'Standard',
+    vars:[{k:'genre',v:'pop'},{k:'tema',v:''},{k:'mood',v:''},{k:'durasi',v:'3-4 menit'},{k:'instrumen',v:'gitar akustik + vokal'}] },
+  { icon:'🎙️', name:'Podcast Script', desc:'Naskah podcast yang engaging', cat:'musik',
+    sys:'Kamu adalah podcast producer dan scriptwriter. Tulis script yang terasa natural diucapkan, bukan dibaca.',
+    user:'Tulis script podcast untuk episode tentang {{topik}}.\n\nFormat: {{format_podcast}}\nDurasi: {{durasi}}\nHost: {{nama_host}}\nAudience: {{audience}}',
+    ctx:'', cons:'Gunakan bahasa conversational. Sertakan [PAUSE], [SFX], [MUSIC] cue. Opening hook kuat. Pertanyaan rhetorikal untuk engagement. Outro + CTA.',
+    format:'Plain text',tone:'Santai',reasoning:'Standard',
+    vars:[{k:'topik',v:''},{k:'format_podcast',v:'solo monologue'},{k:'durasi',v:'15-20 menit'},{k:'nama_host',v:''},{k:'audience',v:'umum'}] },
+
+  // ── BISNIS ──
+  { icon:'📊', name:'Pitch Deck / Presentasi', desc:'Slide yang menjual ide', cat:'bisnis',
+    sys:'Kamu adalah startup advisor dan presentation coach. Bantu membangun narasi presentasi yang persuasif dan memorable.',
+    user:'Buat outline pitch deck untuk {{jenis_presentasi}} tentang {{subjek}}.\n\nAudience: {{audience_presentasi}}\nDurasi: {{durasi_presentasi}}\nTujuan: {{tujuan_presentasi}}',
+    ctx:'', cons:'Sertakan: jumlah slide, judul setiap slide, poin utama, data yang dibutuhkan, visual yang direkomendasikan. Narrative arc yang jelas.',
+    format:'Markdown',tone:'Professional',reasoning:'Think step by step',
+    vars:[{k:'jenis_presentasi',v:'investor pitch'},{k:'subjek',v:''},{k:'audience_presentasi',v:'investor'},{k:'durasi_presentasi',v:'10 menit'},{k:'tujuan_presentasi',v:'seed funding'}] },
+  { icon:'💼', name:'Proposal Bisnis', desc:'Proposal yang memenangkan klien', cat:'bisnis',
+    sys:'Kamu adalah business development expert dengan track record memenangkan proposal senilai miliaran rupiah.',
+    user:'Tulis proposal bisnis untuk {{jenis_proposal}}.\n\nKlien: {{nama_klien}}\nLayanan/produk: {{layanan}}\nNilai deal: {{nilai}}\nDeadline: {{deadline}}',
+    ctx:'Pain point klien: {{pain_point_klien}}', cons:'Executive summary dahulu. Problem → Solution → Benefit → Timeline → Investment → CTA. Tone confident, bukan desperate.',
+    format:'Markdown',tone:'Professional',reasoning:'Standard',
+    vars:[{k:'jenis_proposal',v:'jasa pembuatan website'},{k:'nama_klien',v:''},{k:'layanan',v:''},{k:'nilai',v:''},{k:'deadline',v:''},{k:'pain_point_klien',v:''}] },
+  { icon:'📋', name:'SOP / Dokumentasi', desc:'Prosedur operasional standar', cat:'bisnis',
+    sys:'Kamu adalah business process consultant. Tulis SOP yang jelas, tidak ambigu, dan bisa diikuti oleh siapapun tanpa training khusus.',
+    user:'Buat SOP untuk proses: {{nama_proses}}\n\nDepartemen: {{departemen}}\nPenanggung jawab: {{pic}}\nFrekuensi: {{frekuensi}}',
+    ctx:'Tools yang digunakan: {{tools}}', cons:'Numbered steps yang jelas. Sertakan: tujuan, scope, definisi, langkah detail, checklist, troubleshooting umum.',
+    format:'Markdown',tone:'Professional',reasoning:'Standard',
+    vars:[{k:'nama_proses',v:'onboarding karyawan baru'},{k:'departemen',v:'HR'},{k:'pic',v:'HR Manager'},{k:'frekuensi',v:'setiap ada karyawan baru'},{k:'tools',v:''}] },
+  { icon:'🧠', name:'Brainstorming', desc:'Generate ide dan solusi kreatif', cat:'bisnis',
+    sys:'Kamu adalah creative strategist dan innovation facilitator. Generate ide yang diverse — dari yang konvensional hingga yang out-of-the-box.',
+    user:'Brainstorm ide untuk: {{tantangan}}\n\nKonteks: {{konteks}}\nBatasan: {{batasan}}\nJumlah ide yang diinginkan: {{jumlah}}',
+    ctx:'', cons:'Kategorikan ide (quick win / mid-term / moonshot). Untuk setiap ide: nama, deskripsi singkat, pro, con, effort/impact estimate.',
+    format:'Markdown',tone:'Santai',reasoning:'Chain of thought',
+    vars:[{k:'tantangan',v:''},{k:'konteks',v:''},{k:'batasan',v:''},{k:'jumlah',v:'20'}] },
+
+  // ── EDUKASI ──
+  { icon:'🎓', name:'Materi Pembelajaran', desc:'Modul edukasi yang efektif', cat:'edukasi',
+    sys:'Kamu adalah instructional designer dan educator berpengalaman. Rancang materi yang mengikuti prinsip pedagogi modern: simple → complex, concrete → abstract.',
+    user:'Buat materi pembelajaran tentang {{topik}} untuk {{level_peserta}}.\n\nDurasi belajar: {{durasi_belajar}}\nFormat: {{format_materi}}\nLearning objective: {{objective}}',
+    ctx:'', cons:'Sertakan: tujuan pembelajaran, prasyarat, konten bertahap, contoh & latihan, kuis atau assessment, referensi lanjutan.',
+    format:'Markdown',tone:'Detail',reasoning:'Think step by step',
+    vars:[{k:'topik',v:'dasar-dasar Python'},{k:'level_peserta',v:'pemula total'},{k:'durasi_belajar',v:'2 jam'},{k:'format_materi',v:'modul teks'},{k:'objective',v:'bisa menulis program sederhana'}] },
+  { icon:'🔬', name:'Riset & Analisis', desc:'Analisis mendalam suatu topik', cat:'edukasi',
+    sys:'Kamu adalah research analyst dengan kemampuan mensintesis informasi kompleks menjadi insight yang actionable.',
+    user:'Lakukan analisis mendalam tentang: {{topik_riset}}\n\nAngle: {{angle_riset}}\nKedalaman: {{kedalaman}}\nOutput yang dibutuhkan: {{output_riset}}',
+    ctx:'', cons:'Sertakan: executive summary, temuan utama, data pendukung, counter-argument, kesimpulan, rekomendasi. Akui keterbatasan analisis.',
+    format:'Markdown',tone:'Professional',reasoning:'Chain of thought',
+    vars:[{k:'topik_riset',v:''},{k:'angle_riset',v:'dampak dan tren'},{k:'kedalaman',v:'komprehensif'},{k:'output_riset',v:'laporan eksekutif'}] },
+  { icon:'📝', name:'Essay Akademik', desc:'Esai ilmiah & argumentatif', cat:'edukasi',
+    sys:'Kamu adalah academic writer dan researcher. Tulis esai yang argumentatif, well-structured, dan didukung bukti.',
+    user:'Tulis essay akademik tentang: {{topik_essay}}\n\nArgumen utama (thesis): {{thesis}}\nPanjang: {{panjang_essay}}\nGaya sitasi: {{sitasi}}',
+    ctx:'', cons:'Struktur: Introduction → Body (3+ paragraf) → Conclusion. Setiap klaim didukung evidence. Thesis statement jelas di intro. Counter-argument diakui.',
+    format:'Markdown',tone:'Professional',reasoning:'Think step by step',
+    vars:[{k:'topik_essay',v:''},{k:'thesis',v:''},{k:'panjang_essay',v:'1500 kata'},{k:'sitasi',v:'APA'}] },
+
+  // ── MISC ──
+  { icon:'🎬', name:'Video / Script', desc:'Naskah konten video', cat:'konten',
+    sys:'Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton dan algoritma platform.',
     user:'Buat script video {{style}} tentang {{topik}} untuk {{platform}}.\n\nDurasi: {{durasi}}',
-    ctx:'', cons:'Hook kuat 5 detik pertama. Sertakan visual cues. Closing + CTA natural.',
+    ctx:'', cons:'Hook kuat di 5 detik pertama. Sertakan visual cues / b-roll notes. Closing + CTA yang natural. Tulis seperti orang berbicara, bukan membaca.',
     format:'Plain text',tone:'Santai',reasoning:'Standard',
     vars:[{k:'style',v:'edukatif'},{k:'topik',v:'tips produktivitas'},{k:'platform',v:'YouTube'},{k:'durasi',v:'5-10 menit'}] },
-  { icon:'✨', name:'Blank Canvas', desc:'Mulai dari nol',
+  { icon:'✨', name:'Blank Canvas', desc:'Mulai dari nol bebas', cat:'misc',
     sys:'',user:'',ctx:'',cons:'',
     format:'Plain text',tone:'Professional',reasoning:'Standard',vars:[] },
 ];
@@ -381,11 +494,21 @@ let vars=[], answers={}, activeDomain=null, currentTab='compose', isDark=true, s
 
 // ── INIT ──
 function init(){
-  // templates
+  // templates grouped by category
   const tg=document.getElementById('tmplGrid');
+  const cats={dev:'⚙️ Developer',konten:'✍️ Konten',musik:'🎵 Musik',bisnis:'💼 Bisnis',edukasi:'🎓 Edukasi',misc:'✨ Lainnya'};
+  let lastCat=null;
   TEMPLATES.forEach((t,i)=>{
+    if(t.cat!==lastCat){
+      lastCat=t.cat;
+      const lbl=document.createElement('div');
+      lbl.style.cssText='font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:8px 2px 4px;margin-top:4px';
+      lbl.textContent=cats[t.cat]||t.cat;
+      tg.appendChild(lbl);
+    }
     const b=document.createElement('button');
     b.className='tmpl-btn'+(i===0?' active':'');
+    b.setAttribute('data-tip',t.desc);
     b.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-name">${t.name}</span><span class="t-desc">${t.desc}</span>`;
     b.onclick=()=>loadTemplate(i,b);
     tg.appendChild(b);
