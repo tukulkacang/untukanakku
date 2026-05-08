@@ -452,38 +452,54 @@ const BLOCKS = [
 ];
 
 // ── DOMAINS ──
+// kw = exact phrase match | pat = regex pattern match (lebih fleksibel)
 const DOMAINS = {
-  app:{kw:['aplikasi','app','website','web','sistem','platform','fitur','dashboard','software','crud','api','backend','frontend','mobile','landing page','saas','bot','game','toko','marketplace','aplikasi mobile'],
+  app:{
+    kw:['aplikasi','website','sistem informasi','platform digital','dashboard','software','saas','crud','rest api','backend','frontend','mobile app','landing page','marketplace','toko online','bot telegram','chatbot','game','microservice','monorepo'],
+    pat:[/buat(kan)?\s+(app|web|sistem|platform|tool|dashboard)/,/bangun\s+(app|web|sistem|platform)/,/develop(kan)?/,/coding\s+/,/program\s+untuk/,/fitur\s+(login|register|crud|auth)/],
     label:'Aplikasi / Software',color:'#5b9bd5',bg:'rgba(91,155,213,.12)',
     qs:[{id:'stack',q:'Tech stack?',type:'chip',opts:['React','Vue','Next.js','Flutter','React Native','Laravel','Node.js','Python','Bebas']},
         {id:'user',q:'Target pengguna?',type:'chip',opts:['Developer','End user umum','Tim internal','Admin','Bebas']},
         {id:'scope',q:'Skala?',type:'chip',opts:['MVP','Produksi penuh','Prototype','PoC']},
         {id:'detail',q:'Detail tambahan?',type:'text',ph:'Fitur utama, constraint...'}]},
-  artikel:{kw:['artikel','blog post','tulisan','konten','essay','review','listicle','berita','write article'],
-    label:'Artikel / Konten',color:'#4db89a',bg:'rgba(77,184,154,.12)',
-    qs:[{id:'audience',q:'Untuk siapa?',type:'chip',opts:['Pemula','Profesional','Developer','Umum','Pelajar']},
-        {id:'tone',q:'Tone tulisan?',type:'chip',opts:['Santai','Formal','Edukatif','Persuasif','Storytelling']},
-        {id:'length',q:'Panjang?',type:'chip',opts:['Pendek (300-500 kata)','Sedang (700-1000 kata)','Panjang (1500+ kata)']},
-        {id:'detail',q:'Angle / sudut pandang?',type:'text',ph:'Fokus pada...'}]},
-  lagu:{kw:['lagu','musik','lirik','lyric','song','chord','melodi','rap','hip-hop','nasyid','soundtrack'],
+
+  lagu:{
+    kw:['lagu','lirik','lyric','musik','song','chord','melodi','nada','rap','hip hop','nasyid','soundtrack','verse','chorus','bridge','genre pop','genre rock','genre jazz','genre indie','genre rb','genre folk','pop sad','pop ceria','sad song','love song','breakup song','lagu sedih','lagu cinta','lagu galau','lagu bahagia','lagu romantis','lagu jawa','lagu sunda','lagu melayu','lagu religi','lagu anak'],
+    pat:[/buat(kan)?\s+(lagu|lirik|musik|song)/,/tulis(kan)?\s+(lagu|lirik)/,/(lagu|lirik)\s+tentang/,/tentang\s+(mantan|cinta|rindu|patah hati|putus|galau|kehilangan|kerinduan|perasaan)/,/(mantan|patah hati|putus cinta|galau|rindu)\s*(yang|nya|ku|mu)?/,/pop\s+(sad|ceria|galau|jawa|melayu)/,/r&b|rnb/,/verse\s*1|chorus|bridge/,/(sad|cinta|galau|rindu)\s*(song|music)/],
     label:'Lagu / Musik',color:'#8b7dd8',bg:'rgba(139,125,216,.12)',
-    qs:[{id:'genre',q:'Genre?',type:'chip',opts:['Pop','R&B','Rock','Indie','Jazz','Folk','Hip-hop','Bebas']},
-        {id:'mood',q:'Mood?',type:'chip',opts:['Sedih','Bahagia','Romantis','Energik','Melankolis','Spiritual']},
+    qs:[{id:'genre',q:'Genre?',type:'chip',opts:['Pop','R&B','Rock','Indie','Jazz','Folk','Hip-hop','Jawa/Daerah','Bebas']},
+        {id:'mood',q:'Mood?',type:'chip',opts:['Sedih','Bahagia','Romantis','Energik','Melankolis','Spiritual','Galau']},
         {id:'output',q:'Yang dibutuhin?',type:'chip',opts:['Full lirik','Struktur lagu','Chord & lirik','Konsep saja']},
-        {id:'detail',q:'Cerita / pesan utama?',type:'text',ph:'Tentang seseorang yang...'}]},
-  video:{kw:['video','youtube','script video','naskah video','vlog','reels tiktok','short film','konten video'],
+        {id:'detail',q:'Cerita / pesan utama?',type:'text',ph:'Tentang seseorang yang... / di tempat... / rasa...'}]},
+
+  video:{
+    kw:['video youtube','video tiktok','konten video','script video','naskah video','vlog','reels','short video','dokumenter','tutorial video','podcast video'],
+    pat:[/buat(kan)?\s+(video|script|naskah)\s+/,/script\s+(untuk|buat)/,/konten\s+(youtube|tiktok|reels)/],
     label:'Video / Script',color:'#d4614a',bg:'rgba(212,97,74,.12)',
     qs:[{id:'platform',q:'Platform?',type:'chip',opts:['YouTube','TikTok','Instagram Reels','Presentasi','Iklan']},
         {id:'duration',q:'Durasi?',type:'chip',opts:['< 1 menit','1-5 menit','5-15 menit','15+ menit']},
         {id:'style',q:'Style?',type:'chip',opts:['Edukatif','Hiburan','Storytelling','Tutorial','Motivasi']},
         {id:'detail',q:'Hook / CTA khusus?',type:'text',ph:''}]},
-  desain:{kw:['desain','design ui','ux design','wireframe','mockup','logo','branding','poster','infografis','figma'],
+
+  artikel:{
+    kw:['artikel','blog post','tulisan','konten artikel','essay','review produk','listicle','berita','opini','kolom'],
+    pat:[/tulis(kan)?\s+(artikel|blog|essay|tulisan)/,/buat(kan)?\s+(artikel|blog|konten)/],
+    label:'Artikel / Konten',color:'#4db89a',bg:'rgba(77,184,154,.12)',
+    qs:[{id:'audience',q:'Untuk siapa?',type:'chip',opts:['Pemula','Profesional','Developer','Umum','Pelajar']},
+        {id:'tone',q:'Tone tulisan?',type:'chip',opts:['Santai','Formal','Edukatif','Persuasif','Storytelling']},
+        {id:'length',q:'Panjang?',type:'chip',opts:['Pendek (300-500 kata)','Sedang (700-1000 kata)','Panjang (1500+ kata)']},
+        {id:'detail',q:'Angle / sudut pandang?',type:'text',ph:'Fokus pada...'}]},
+
+  desain:{
+    kw:['desain ui','desain ux','ui ux','wireframe','mockup','logo','branding','poster','banner','infografis','figma','adobe xd','design system','color palette','typography'],
+    pat:[/buat(kan)?\s+(desain|design|logo|poster|banner)/,/desain(kan)?\s+/],
     label:'Desain / UI',color:'#d4923a',bg:'rgba(212,146,58,.12)',
     qs:[{id:'type',q:'Jenis?',type:'chip',opts:['UI/UX App','Wireframe','Branding','Poster','Infografis']},
         {id:'style',q:'Gaya visual?',type:'chip',opts:['Minimalis','Modern','Playful','Corporate','Retro']},
         {id:'tool',q:'Tool?',type:'chip',opts:['Figma','Adobe XD','Canva','Sketch','Bebas']},
         {id:'detail',q:'Referensi / detail?',type:'text',ph:'Warna brand, inspirasi...'}]},
-  umum:{kw:[],label:'Umum',color:'#8a8880',bg:'rgba(138,136,128,.12)',
+
+  umum:{kw:[],pat:[],label:'Umum',color:'#8a8880',bg:'rgba(138,136,128,.12)',
     qs:[{id:'goal',q:'Tujuan?',type:'chip',opts:['Buat dari nol','Improve yang ada','Riset','Jelaskan konsep']},
         {id:'output',q:'Format output?',type:'chip',opts:['Teks/paragraf','List/poin','Kode','Tabel','Bebas']},
         {id:'detail',q:'Konteks tambahan?',type:'text',ph:'Semakin detail semakin presisi...'}]},
@@ -671,21 +687,27 @@ function autoDetectVarsFromText(){
   if(added) renderVars();
 }
 
-// ── DOMAIN DETECTION (whole-word aware) ──
+// ── DOMAIN DETECTION (keyword + regex pattern) ──
 function detectDomain(text){
   const t=' '+text.toLowerCase()+' ';
-  // prioritize longer keywords first
-  const sorted=Object.entries(DOMAINS).filter(([k])=>k!=='umum')
-    .map(([k,d])=>({k,d,maxLen:Math.max(...d.kw.map(w=>w.length))}))
-    .sort((a,b)=>b.maxLen-a.maxLen);
-  for(const {k,d} of sorted){
-    for(const kw of d.kw){
-      // whole-word match using space boundaries
-      const re=new RegExp('(^|\\s)'+kw+'(\\s|$)');
-      if(re.test(t)) return k;
+  // Score tiap domain
+  const scores={};
+  for(const [k,d] of Object.entries(DOMAINS)){
+    if(k==='umum') continue;
+    let score=0;
+    // keyword match (longer = higher score)
+    for(const kw of (d.kw||[])){
+      if(t.includes(kw)) score+=kw.split(' ').length*2; // multi-word keyword lebih berat
     }
+    // regex pattern match
+    for(const pat of (d.pat||[])){
+      if(pat.test(t)) score+=3;
+    }
+    scores[k]=score;
   }
-  return 'umum';
+  // ambil domain dengan score tertinggi
+  const best=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
+  return (best && best[1]>0) ? best[0] : 'umum';
 }
 
 function onIntentInput(val){
@@ -812,9 +834,31 @@ function buildSmartPrompt(){
     system=`Kamu adalah content writer dan journalist profesional dengan kemampuan riset mendalam dan gaya menulis yang engaging.`;
     user=`Tugas kamu: Tulis artikel tentang ${intent}.\n\nParameter:\n- Target pembaca: ${audience}\n- Tone: ${tone}\n- Panjang: ${length}${detail?'\n- Angle: '+detail:''}\n\nStruktur:\n1. Headline menarik, tidak clickbait\n2. Opening hook\n3. Isi dengan subheading jelas\n4. Data atau contoh konkret\n5. Penutup kuat dengan takeaway\n\nGunakan active voice. Hindari basa-basi.`;
   } else if(dk==='lagu'){
-    const genre=ans.genre||'pop';const mood=ans.mood||'bebas';const output=ans.output||'full lirik';const detail=ans.detail||'';
-    system=`Kamu adalah songwriter profesional. Ahli dalam struktur lagu, imagery lirik, dan emosi musikal.`;
-    user=`Tugas kamu: Buat ${output} untuk lagu ${genre} tentang ${intent}.\n\nSpesifikasi:\n- Genre: ${genre}\n- Mood: ${mood}${detail?'\n- Cerita/pesan: '+detail:''}\n\nYang dihasilkan:\n- Struktur lagu (verse / pre-chorus / chorus / bridge / outro)\n- Lirik dengan imagery kuat, bukan klise\n- Hook chorus mudah diingat\n- Konsistensi tema dan emosi\n- (Opsional) Petunjuk melodi atau feel musik`;
+    const genre=ans.genre||'Pop';const mood=ans.mood||'bebas';const output=ans.output||'Full lirik';const detail=ans.detail||'';
+    const isLirik = output==='Full lirik'||output==='Chord & lirik';
+    system=`Kamu adalah songwriter profesional kelas dunia. Kamu telah menulis ratusan lagu untuk artis top. Kamu HANYA berkomunikasi melalui lirik — bukan penjelasan, bukan cerita, bukan analisis.
+
+ATURAN KERAS yang tidak boleh dilanggar:
+1. LANGSUNG mulai dengan "[Verse 1]" — tidak ada kalimat pembuka, tidak ada "Berikut liriknya", tidak ada penjelasan apapun sebelum lirik
+2. DILARANG menulis narasi, deskripsi, atau komentar di antara bagian lirik
+3. Setiap bagian WAJIB diberi label: [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Outro]
+4. Jika ada catatan produksi, tulis di bagian terpisah setelah lirik selesai, dengan label [Catatan Produser]`;
+
+    user=`Tulis ${output} lagu ${genre} tentang: ${intent}
+
+Spesifikasi:
+- Genre: ${genre}
+- Mood: ${mood}
+- Bahasa: Indonesia${detail?'\n- Cerita/konteks: '+detail:''}
+
+Kriteria lirik wajib:
+• Imagery konkret dan spesifik (sebutkan tempat, benda, momen nyata — bukan kata abstrak)
+• Hindari kata klise: "hati", "jiwa", "takdir", "selamanya" kecuali dalam konteks segar
+• Chorus harus bisa diingat dalam sekali dengar
+• Konsistensi emosi dari awal hingga akhir
+${output==='Chord & lirik'?'• Tulis chord di atas setiap baris: [Am] [F] [C] [G] dst':''}
+
+MULAI SEKARANG — langsung dari [Verse 1]:`;
   } else if(dk==='video'){
     const platform=ans.platform||'YouTube';const duration=ans.duration||'5-15 menit';const style=ans.style||'edukatif';const detail=ans.detail||'';
     system=`Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton.`;
