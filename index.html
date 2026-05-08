@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prompt Builder v3 — Generator Prompt Tajam (Multi-AI Ready)</title>
+<title>Prompt Builder v3 — Smart AI Prompt Generator + Multi-AI</title>
 <style>
 :root {
   --bg:#0f0f0f;--bg2:#161616;--bg3:#1e1e1e;--bg4:#252525;
@@ -38,16 +38,16 @@ button{font-family:var(--font);cursor:pointer}
 #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50}
 #overlay.show{display:block}
 /* ── HEADER ── */
-header{padding:14px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg2);flex-wrap:wrap}
+header{padding:14px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg2)}
 .logo{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#0f0f0f;flex-shrink:0}
 .header-title{font-size:15px;font-weight:600}
 .header-sub{font-size:11px;color:var(--text2);margin-top:1px}
-.header-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 .header-badge{font-size:10px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--accent2);color:var(--accent);letter-spacing:.04em}
 .icon-btn{width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .icon-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
 /* ── LAYOUT ── */
-.app{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 70px)}
+.app{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 57px)}
 /* ── SIDEBAR ── */
 .sidebar{background:var(--bg2);border-right:0.5px solid var(--border);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:18px}
 .sec-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
@@ -118,7 +118,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
 .preview-sys{color:var(--blue)}
 .preview-usr{color:var(--text)}
 .output-meta{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--text3);flex-wrap:wrap}
-/* AI Buttons */
+/* AI Buttons - NEW */
 .ai-send-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 .ai-send-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .15s;cursor:pointer}
 .ai-send-btn:hover{filter:brightness(1.2);border-color:var(--accent2)}
@@ -128,7 +128,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
 .ai-send-btn.gemini{background:#212121;color:#8e7cc3;border-color:#8e7cc340}
 .ai-send-btn.grok{background:#212121;color:#e04040;border-color:#e0404040}
 /* bottom bar */
-.bottom-bar{padding:10px 18px;border-top:0.5px solid var(--border);display:flex;align-items:center;gap:7px;background:var(--bg2);flex-wrap:wrap}
+.bottom-bar{padding:10px 18px;border-top:0.5px solid var(--border);display:flex;align-items:center;gap:7px;background:var(--bg2)}
 .char-badge{font-size:11px;color:var(--text3);font-family:var(--mono);margin-right:auto}
 .gen-btn{padding:8px 18px;background:var(--accent);color:#0f0f0f;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
 .gen-btn:hover{opacity:.88}
@@ -148,7 +148,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 /* mobile */
-@media(max-width:820px){
+@media(max-width:700px){
   .app{grid-template-columns:1fr}
   .sidebar{position:fixed;left:-280px;top:0;height:100vh;width:270px;z-index:60;transition:left .25s cubic-bezier(.4,0,.2,1);border-right:0.5px solid var(--border2)}
   .sidebar.open{left:0}
@@ -171,7 +171,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
   <div class="logo">P</div>
   <div>
     <div class="header-title">Prompt Builder</div>
-    <div class="header-sub">Prompt tajam · multi-AI ready</div>
+    <div class="header-sub">Ketik singkat → dapat prompt tajam</div>
   </div>
   <div class="header-right">
     <span class="autosave" id="autosaveIndicator" data-tip="Auto-save aktif"><span class="dot2"></span>Tersimpan</span>
@@ -204,7 +204,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
     <div class="intent-bar">
       <div class="intent-wrap">
         <textarea class="intent-input" id="intentInput" rows="2"
-          placeholder="Ketik apa yang mau dibuat... contoh: bikin aplikasi manajemen tugas, lagu pop tentang hujan, artikel tentang AI, strategi growth startup"
+          placeholder="Ketik apa yang mau dibuat... contoh: bikin aplikasi manajemen tugas, lagu pop tentang hujan, artikel tentang AI"
           oninput="onIntentInput(this.value)"></textarea>
         <button class="detect-btn" id="detectBtn" onclick="detectAndShow()" data-tip="Deteksi domain & tampilkan pertanyaan">Generate →</button>
       </div>
@@ -248,7 +248,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
             <label>Tone</label>
             <select class="field" id="tone">
               <option>Professional</option><option>Santai</option><option>Teknikal</option>
-              <option>Ringkas</option><option>Detail</option><option>Persuasif</option><option>Empati</option>
+              <option>Ringkas</option><option>Detail</option>
             </select>
           </div>
           <div class="config-item">
@@ -286,12 +286,11 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
       <div class="tab-pane" id="tab-output">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
           <div class="field-label" style="margin:0">Prompt siap pakai</div>
-          <div style="display:flex;gap:5px">
-             <button class="sec-btn" style="font-size:11px" onclick="copyActive()" data-tip="Copy output ini">Copy</button>
-          </div>
+          <button class="sec-btn" style="font-size:11px" onclick="copyActive()" data-tip="Copy output ini">Copy</button>
         </div>
-        <textarea class="output-box" id="outputBox" style="resize:vertical;min-height:200px;flex:1" spellcheck="false" readonly>Prompt yang di-generate akan muncul di sini.</textarea>
-        <div class="ai-send-row" id="aiSendRow">
+        <textarea class="output-box" id="outputBox" style="resize:vertical;min-height:200px;flex:1" spellcheck="false">Prompt yang di-generate akan muncul di sini.</textarea>
+        <!-- NEW: AI Buttons Row -->
+        <div class="ai-send-row">
           <button class="ai-send-btn chatgpt" onclick="sendToAI('chatgpt')">🧠 ChatGPT</button>
           <button class="ai-send-btn claude" onclick="sendToAI('claude')">📜 Claude</button>
           <button class="ai-send-btn deepseek" onclick="sendToAI('deepseek')">🐋 DeepSeek</button>
@@ -306,46 +305,41 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
     <div class="bottom-bar">
       <span class="char-badge" id="charBadge">0 chars</span>
       <button class="sec-btn" onclick="resetAll()" data-tip="Reset semua field">Reset</button>
-      <button class="sec-btn" onclick="copyActive()" data-tip="Copy prompt aktif">Copy prompt</button>
-      <div style="display:flex;gap:4px;margin:0 5px;" id="bottomAiBtns">
-        <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('chatgpt')" data-tip="Ke ChatGPT">🧠</button>
-        <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('claude')" data-tip="Ke Claude">📜</button>
-        <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('deepseek')" data-tip="Ke DeepSeek">🐋</button>
-        <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('gemini')" data-tip="Ke Gemini">✨</button>
-        <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('grok')" data-tip="Ke Grok">🔥</button>
-      </div>
+      <button class="sec-btn" onclick="copyActive()" data-tip="Copy prompt aktif (preview/output)">Copy prompt</button>
+      <!-- NEW: Mini AI buttons in bottom bar -->
+      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('chatgpt')" data-tip="Ke ChatGPT">🧠</button>
+      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('claude')" data-tip="Ke Claude">📜</button>
+      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('deepseek')" data-tip="Ke DeepSeek">🐋</button>
+      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('gemini')" data-tip="Ke Gemini">✨</button>
+      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('grok')" data-tip="Ke Grok">🔥</button>
       <button class="gen-btn" id="genBtn" onclick="generatePrompt()" data-tip="Generate prompt dari semua input">⚡ Generate</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── AI SEND FUNCTION ──
+// ── NEW: Send to AI function ──
 function sendToAI(ai) {
   let text = '';
   if (currentTab === 'output') {
     text = document.getElementById('outputBox').value;
   } else {
-    const {system, user} = compilePrompt();
-    text = (system ? '[SYSTEM]\n' + system + '\n\n' : '') + '[USER]\n' + user;
+    var c = compilePrompt();
+    text = (c.system ? '[SYSTEM]\n' + c.system + '\n\n' : '') + '[USER]\n' + c.user;
   }
   if (!text || text.trim() === 'Prompt yang di-generate akan muncul di sini.') {
     toast('Generate dulu prompt-nya!');
     return;
   }
-
-  // Copy to clipboard
-  navigator.clipboard.writeText(text).then(() => {
+  navigator.clipboard.writeText(text).then(function() {
     toast('✅ Prompt disalin! Paste (Ctrl+V) di ' + ai.toUpperCase());
-  }).catch(() => {
-    const ta = document.createElement('textarea');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
     ta.value = text; document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
     toast('✅ Prompt disalin! Paste (Ctrl+V) di ' + ai.toUpperCase());
   });
-
-  // URL mapping
-  const urls = {
+  var urls = {
     chatgpt: 'https://chat.openai.com/',
     deepseek: 'https://chat.deepseek.com/',
     claude: 'https://claude.ai/',
@@ -355,17 +349,17 @@ function sendToAI(ai) {
   window.open(urls[ai] || urls.chatgpt, '_blank');
 }
 
-// ── TEMPLATES (Diperbanyak & Diperkuat) ──
+// ── TEMPLATES (original + NEW) ──
 const TEMPLATES = [
   // ── DEV ──
   { icon:'💻', name:'App / Software', desc:'Bangun aplikasi dari scratch', cat:'dev',
-    sys:'Kamu adalah senior software engineer dan product architect dengan pengalaman 15+ tahun di Silicon Valley. Kamu telah membangun puluhan aplikasi production-grade.',
+    sys:'Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun membangun aplikasi production-grade.',
     user:'Bantu saya membuat {{deskripsi_app}}.\n\nTech stack: {{stack}}\nTarget pengguna: {{target_user}}\nScope: {{scope}}',
-    ctx:'', cons:'Berikan: breakdown fitur, arsitektur, struktur folder, langkah implementasi bertahap. Sertakan contoh kode nyata. JANGAN menjelaskan bahwa kamu AI — langsung eksekusi.',
+    ctx:'', cons:'Berikan: breakdown fitur, arsitektur, struktur folder, langkah implementasi bertahap. Sertakan contoh kode nyata.',
     format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
     vars:[{k:'deskripsi_app',v:'aplikasi to-do list'},{k:'stack',v:'React + Node.js'},{k:'target_user',v:'umum'},{k:'scope',v:'MVP'}] },
   { icon:'🐛', name:'Debug & Review', desc:'Diagnosa bug & code review', cat:'dev',
-    sys:'Kamu adalah expert debugger dan code reviewer. Analisis error secara sistematis, cari root cause bukan symptom. Berikan fix yang benar-benar bekerja. Jangan bertele-tele.',
+    sys:'Kamu adalah expert debugger dan code reviewer. Analisis error secara sistematis, cari root cause bukan symptom. Berikan fix yang benar-benar bekerja.',
     user:'Error yang saya hadapi:\n```\n{{error_message}}\n```\n\nKode bermasalah:\n```{{bahasa}}\n{{kode}}\n```\n\nEkspektasi: {{ekspektasi}}',
     ctx:'Environment: {{environment}}', cons:'Jelaskan KENAPA error terjadi. Berikan fix exact. Sebutkan edge case.',
     format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
@@ -420,12 +414,6 @@ const TEMPLATES = [
     ctx:'', cons:'Show, dont tell. Dialogue yang natural. Opening yang langsung menarik. Ending yang berkesan, tidak harus happy ending.',
     format:'Plain text',tone:'Detail',reasoning:'Standard',
     vars:[{k:'genre',v:'drama realistis'},{k:'premis',v:''},{k:'setting',v:''},{k:'karakter_utama',v:''},{k:'konflik',v:''},{k:'panjang',v:'500 kata'}] },
-  { icon:'🎬', name:'Video / Script', desc:'Naskah konten video', cat:'konten',
-    sys:'Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton dan algoritma platform.',
-    user:'Buat script video {{style}} tentang {{topik}} untuk {{platform}}.\n\nDurasi: {{durasi}}',
-    ctx:'', cons:'Hook kuat di 5 detik pertama. Sertakan visual cues / b-roll notes. Closing + CTA yang natural. Tulis seperti orang berbicara, bukan membaca.',
-    format:'Plain text',tone:'Santai',reasoning:'Standard',
-    vars:[{k:'style',v:'edukatif'},{k:'topik',v:'tips produktivitas'},{k:'platform',v:'YouTube'},{k:'durasi',v:'5-10 menit'}] },
 
   // ── MUSIK ──
   { icon:'🎵', name:'Lirik Lagu', desc:'Langsung tulis lirik, bukan cerita', cat:'musik',
@@ -455,7 +443,7 @@ const TEMPLATES = [
     format:'Markdown',tone:'Professional',reasoning:'Think step by step',
     vars:[{k:'jenis_presentasi',v:'investor pitch'},{k:'subjek',v:''},{k:'audience_presentasi',v:'investor'},{k:'durasi_presentasi',v:'10 menit'},{k:'tujuan_presentasi',v:'seed funding'}] },
   { icon:'💼', name:'Proposal Bisnis', desc:'Proposal yang memenangkan klien', cat:'bisnis',
-    sys:'Kamu adalah business development expert dengan track record memenangkan proposal. Tulis proposal yang konkret, bukan template.',
+    sys:'Kamu adalah business development expert dengan track record memenangkan proposal senilai miliaran rupiah.',
     user:'Tulis proposal bisnis untuk {{jenis_proposal}}.\n\nKlien: {{nama_klien}}\nLayanan/produk: {{layanan}}\nNilai deal: {{nilai}}\nDeadline: {{deadline}}',
     ctx:'Pain point klien: {{pain_point_klien}}', cons:'Executive summary dahulu. Problem → Solution → Benefit → Timeline → Investment → CTA. Tone confident, bukan desperate.',
     format:'Markdown',tone:'Professional',reasoning:'Standard',
@@ -467,16 +455,17 @@ const TEMPLATES = [
     format:'Markdown',tone:'Professional',reasoning:'Standard',
     vars:[{k:'nama_proses',v:'onboarding karyawan baru'},{k:'departemen',v:'HR'},{k:'pic',v:'HR Manager'},{k:'frekuensi',v:'setiap ada karyawan baru'},{k:'tools',v:''}] },
   { icon:'🧠', name:'Brainstorming', desc:'Generate ide dan solusi kreatif', cat:'bisnis',
-    sys:'Kamu adalah creative strategist dan innovation facilitator. Generate ide yang diverse — dari yang konvensional hingga yang out-of-the-box. Jangan sensor ide gila.',
+    sys:'Kamu adalah creative strategist dan innovation facilitator. Generate ide yang diverse — dari yang konvensional hingga yang out-of-the-box.',
     user:'Brainstorm ide untuk: {{tantangan}}\n\nKonteks: {{konteks}}\nBatasan: {{batasan}}\nJumlah ide yang diinginkan: {{jumlah}}',
     ctx:'', cons:'Kategorikan ide (quick win / mid-term / moonshot). Untuk setiap ide: nama, deskripsi singkat, pro, con, effort/impact estimate.',
     format:'Markdown',tone:'Santai',reasoning:'Chain of thought',
     vars:[{k:'tantangan',v:''},{k:'konteks',v:''},{k:'batasan',v:''},{k:'jumlah',v:'20'}] },
+  // NEW BUSINESS TEMPLATES
   { icon:'⚖️', name:'Negosiasi & Persuasi', desc:'Strategi negosiasi & skrip', cat:'bisnis',
     sys:'Kamu adalah mantan negosiator FBI dan konsultan negosiasi korporat. Kuasai tactical empathy, calibrated questions, dan value framing.',
     user:'Saya akan bernegosiasi tentang: {{konteks_negosiasi}}\n\nPihak lawan: {{pihak_lawan}}\nTujuan saya: {{tujuan_negosiasi}}\nBATNA (alternatif terbaik): {{batna}}\nPower dynamic: {{power_dynamic}}',
     ctx:'', cons:'Berikan: 1) Persiapan sebelum negosiasi (data, riset), 2) Strategi pembukaan, 3) 5 kalibrasi pertanyaan untuk mengumpulkan informasi, 4) Beberapa skenario respon berdasarkan kemungkinan reaksi lawan, 5) Closing strategy. JANGAN jelaskan ulang siapa kamu.',
-    format:'Markdown',tone:'Profesional',reasoning:'Think step by step',
+    format:'Markdown',tone:'Professional',reasoning:'Think step by step',
     vars:[{k:'konteks_negosiasi',v:'kenaikan gaji'},{k:'pihak_lawan',v:'manajer HR'},{k:'tujuan_negosiasi',v:'naik 30%'},{k:'batna',v:'ada tawaran dari perusahaan lain'},{k:'power_dynamic',v:'saya punya leverage karena tim sangat bergantung pada saya'}] },
   { icon:'📈', name:'Growth Hacking', desc:'Strategi pertumbuhan startup', cat:'bisnis',
     sys:'Kamu adalah growth hacker yang pernah membantu dua unicorn mencapai 100M user. Paham ICE framework, viral loops, dan retention mechanics.',
@@ -504,6 +493,7 @@ const TEMPLATES = [
     ctx:'', cons:'Struktur: Introduction → Body (3+ paragraf) → Conclusion. Setiap klaim didukung evidence. Thesis statement jelas di intro. Counter-argument diakui.',
     format:'Markdown',tone:'Professional',reasoning:'Think step by step',
     vars:[{k:'topik_essay',v:''},{k:'thesis',v:''},{k:'panjang_essay',v:'1500 kata'},{k:'sitasi',v:'APA'}] },
+  // NEW EDUKASI
   { icon:'🎮', name:'Game Design (GDD)', desc:'Game Design Document', cat:'edukasi',
     sys:'Kamu adalah senior game designer yang telah merilis game di Steam, mobile, dan konsol. Paham MDA framework, monetisasi, dan retention loop.',
     user:'Bantu saya mendesain game: {{konsep_game}}\n\nGenre: {{genre_game}}\nPlatform: {{platform_game}}\nTarget audiens: {{audiens_game}}\nModel monetisasi: {{monetisasi_game}}',
@@ -517,10 +507,17 @@ const TEMPLATES = [
     format:'Plain text',tone:'Empati',reasoning:'Think step by step',
     vars:[{k:'topik_sesi',v:'quarter life crisis'},{k:'masalah_klien',v:'merasa stuck di karir'},{k:'emosi_dominan',v:'cemas dan bingung'},{k:'yang_sudah_dictoba',v:'apply job sana-sini tapi tidak ada panggilan'},{k:'tujuan_sesi',v:'mendapatkan kejelasan arah karir 6 bulan ke depan'}] },
 
-  // ── MISC / LAINNYA ──
+  // ── MISC ──
+  { icon:'🎬', name:'Video / Script', desc:'Naskah konten video', cat:'konten',
+    sys:'Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton dan algoritma platform.',
+    user:'Buat script video {{style}} tentang {{topik}} untuk {{platform}}.\n\nDurasi: {{durasi}}',
+    ctx:'', cons:'Hook kuat di 5 detik pertama. Sertakan visual cues / b-roll notes. Closing + CTA yang natural. Tulis seperti orang berbicara, bukan membaca.',
+    format:'Plain text',tone:'Santai',reasoning:'Standard',
+    vars:[{k:'style',v:'edukatif'},{k:'topik',v:'tips produktivitas'},{k:'platform',v:'YouTube'},{k:'durasi',v:'5-10 menit'}] },
   { icon:'✨', name:'Blank Canvas', desc:'Mulai dari nol bebas', cat:'misc',
     sys:'',user:'',ctx:'',cons:'',
     format:'Plain text',tone:'Professional',reasoning:'Standard',vars:[] },
+  // NEW MISC
   { icon:'📄', name:'Resume / CV', desc:'CV ATS-friendly & impactful', cat:'misc',
     sys:'Kamu adalah top-tier HR recruiter dan career coach. Tulis resume/CV yang melewati filter ATS, menarik perhatian rekruter dalam 7 detik pertama.',
     user:'Bantu saya tulis resume untuk posisi: {{posisi_dilamar}}\n\nIndustri: {{industri}}\nRingkasan pengalaman: {{ringkasan_pengalaman}}\nSkill utama: {{skill_utama}}',
@@ -600,60 +597,58 @@ let vars=[], answers={}, activeDomain=null, currentTab='compose', isDark=true, s
 
 // ── INIT ──
 function init(){
-  const tg=document.getElementById('tmplGrid');
-  const cats={dev:'⚙️ Developer',konten:'✍️ Konten',musik:'🎵 Musik',bisnis:'💼 Bisnis',edukasi:'🎓 Edukasi',misc:'✨ Lainnya'};
-  let lastCat=null;
-  TEMPLATES.forEach((t,i)=>{
+  var tg=document.getElementById('tmplGrid');
+  var cats={dev:'⚙️ Developer',konten:'✍️ Konten',musik:'🎵 Musik',bisnis:'💼 Bisnis',edukasi:'🎓 Edukasi',misc:'✨ Lainnya'};
+  var lastCat=null;
+  TEMPLATES.forEach(function(t,i){
     if(t.cat!==lastCat){
       lastCat=t.cat;
-      const lbl=document.createElement('div');
+      var lbl=document.createElement('div');
       lbl.style.cssText='font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:8px 2px 4px;margin-top:4px';
       lbl.textContent=cats[t.cat]||t.cat;
       tg.appendChild(lbl);
     }
-    const b=document.createElement('button');
+    var b=document.createElement('button');
     b.className='tmpl-btn'+(i===0?' active':'');
     b.setAttribute('data-tip',t.desc);
-    b.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-name">${t.name}</span><span class="t-desc">${t.desc}</span>`;
-    b.onclick=()=>loadTemplate(i,b);
+    b.innerHTML='<span class="t-icon">'+t.icon+'</span><span class="t-name">'+t.name+'</span><span class="t-desc">'+t.desc+'</span>';
+    b.onclick=function(){loadTemplate(i,b);};
     tg.appendChild(b);
   });
-  const bc=document.getElementById('blockChips');
-  BLOCKS.forEach(bl=>{
-    const c=document.createElement('button');
+  var bc=document.getElementById('blockChips');
+  BLOCKS.forEach(function(bl){
+    var c=document.createElement('button');
     c.className='block-chip';
     c.setAttribute('data-tip','Insert '+bl.label+' block ke user prompt');
-    c.innerHTML=`<span class="dot" style="background:${bl.color}"></span>${bl.label}`;
-    c.onclick=()=>insertBlock(bl.text);
+    c.innerHTML='<span class="dot" style="background:'+bl.color+'"></span>'+bl.label;
+    c.onclick=function(){insertBlock(bl.text);};
     bc.appendChild(c);
   });
-
-  const saved=loadFromStorage();
+  var saved=loadFromStorage();
   if(saved){
     restoreState(saved);
   } else {
     loadTemplate(0,document.querySelector('.tmpl-btn'));
   }
-
-  ['systemPrompt','userPrompt','contextPrompt','constraintPrompt'].forEach(id=>{
-    document.getElementById(id).addEventListener('input',()=>{
+  ['systemPrompt','userPrompt','contextPrompt','constraintPrompt'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',function(){
       updateCharCount();
       autoDetectVarsFromText();
       if(currentTab==='preview') renderPreview();
       scheduleSave();
     });
   });
-  ['outputFormat','tone','reasoning'].forEach(id=>{
-    document.getElementById(id).addEventListener('change',()=>{
+  ['outputFormat','tone','reasoning'].forEach(function(id){
+    document.getElementById(id).addEventListener('change',function(){
       updateCharCount();
       if(currentTab==='preview') renderPreview();
       scheduleSave();
     });
   });
-
   updateCharCount();
 }
 
+// ── THEME ──
 function toggleTheme(){
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
@@ -668,17 +663,19 @@ function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
 }
-function toast(msg,duration=2200){
-  const t=document.getElementById('toast');
+function toast(msg,duration){
+  duration=duration||2000;
+  var t=document.getElementById('toast');
   t.textContent=msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),duration);
+  setTimeout(function(){t.classList.remove('show');},duration);
 }
 
+// ── TEMPLATES ──
 function loadTemplate(i,btn){
-  document.querySelectorAll('.tmpl-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tmpl-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  const t=TEMPLATES[i];
+  var t=TEMPLATES[i];
   document.getElementById('systemPrompt').value=t.sys;
   document.getElementById('userPrompt').value=t.user;
   document.getElementById('contextPrompt').value=t.ctx;
@@ -686,44 +683,39 @@ function loadTemplate(i,btn){
   document.getElementById('outputFormat').value=t.format;
   document.getElementById('tone').value=t.tone;
   document.getElementById('reasoning').value=t.reasoning;
-  vars=t.vars.map(v=>({...v}));
+  vars=t.vars.map(function(v){return {k:v.k,v:v.v};});
   renderVars();
   updateCharCount();
   scheduleSave();
   toast('Template "'+t.name+'" dimuat');
 }
-
 function insertBlock(text){
-  const ta=document.getElementById('userPrompt');
-  const pos=ta.selectionStart!==undefined?ta.selectionStart:ta.value.length;
+  var ta=document.getElementById('userPrompt');
+  var pos=ta.selectionStart!==undefined?ta.selectionStart:ta.value.length;
   ta.value=ta.value.slice(0,pos)+text+ta.value.slice(pos);
   ta.focus();
   ta.selectionStart=ta.selectionEnd=pos+text.length;
   ta.classList.add('blinked');
-  setTimeout(()=>ta.classList.remove('blinked'),600);
+  setTimeout(function(){ta.classList.remove('blinked');},600);
   autoDetectVarsFromText();
   updateCharCount();
   if(currentTab==='preview') renderPreview();
   scheduleSave();
   toast('Block ditambahkan ✓');
 }
-
 function renderVars(){
-  const c=document.getElementById('varRows');
+  var c=document.getElementById('varRows');
   c.innerHTML='';
-  vars.forEach((v,i)=>{
-    const row=document.createElement('div');
+  vars.forEach(function(v,i){
+    var row=document.createElement('div');
     row.className='var-row';
-    row.innerHTML=`
-      <input value="${escHtml(v.k)}" placeholder="nama_var" oninput="onVarNameChange(${i},this)">
-      <input value="${escHtml(v.v)}" placeholder="nilai" oninput="vars[${i}].v=this.value;updateCharCount();if(currentTab==='preview')renderPreview();scheduleSave()">
-      <button class="del-btn" onclick="removeVar(${i})">×</button>`;
+    row.innerHTML='<input value="'+escHtml(v.k)+'" placeholder="nama_var" data-tip="Nama variabel (huruf & underscore)" oninput="onVarNameChange('+i+',this)"><input value="'+escHtml(v.v)+'" placeholder="nilai" data-tip="Nilai yang akan disubstitusi" oninput="vars['+i+'].v=this.value;updateCharCount();if(currentTab===\'preview\')renderPreview();scheduleSave()"><button class="del-btn" onclick="removeVar('+i+')" data-tip="Hapus variabel ini">×</button>';
     c.appendChild(row);
   });
 }
 function onVarNameChange(i,input){
-  const val=input.value;
-  const valid=/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(val)||val==='';
+  var val=input.value;
+  var valid=/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(val)||val==='';
   input.classList.toggle('invalid',!valid);
   if(valid) vars[i].k=val;
   updateCharCount();
@@ -732,42 +724,47 @@ function onVarNameChange(i,input){
 }
 function addVar(){vars.push({k:'var_baru',v:''});renderVars();}
 function removeVar(i){vars.splice(i,1);renderVars();scheduleSave();}
-
 function autoDetectVarsFromText(){
-  const texts=[
+  var texts=[
     document.getElementById('systemPrompt').value,
     document.getElementById('userPrompt').value,
     document.getElementById('contextPrompt').value,
     document.getElementById('constraintPrompt').value,
   ].join(' ');
-  const matches=[...texts.matchAll(/\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g)];
-  const found=new Set(matches.map(m=>m[1]));
-  let added=false;
-  found.forEach(key=>{if(!vars.find(v=>v.k===key)){vars.push({k:key,v:''});added=true;}});
+  var matches=texts.match(/\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g)||[];
+  var found={};
+  matches.forEach(function(m){var k=m.slice(2,-2);found[k]=true;});
+  var added=false;
+  Object.keys(found).forEach(function(key){
+    if(!vars.find(function(v){return v.k===key;})){
+      vars.push({k:key,v:''});
+      added=true;
+    }
+  });
   if(added) renderVars();
 }
-
 function detectDomain(text){
-  const t=' '+text.toLowerCase()+' ';
-  const scores={};
-  for(const [k,d] of Object.entries(DOMAINS)){
+  var t=' '+text.toLowerCase()+' ';
+  var scores={};
+  for(var k in DOMAINS){
     if(k==='umum') continue;
-    let score=0;
-    for(const kw of (d.kw||[])){if(t.includes(kw)) score+=kw.split(' ').length*2;}
-    for(const pat of (d.pat||[])){if(pat.test(t)) score+=3;}
+    var d=DOMAINS[k];
+    var score=0;
+    (d.kw||[]).forEach(function(kw){if(t.indexOf(kw)!==-1) score+=kw.split(' ').length*2;});
+    (d.pat||[]).forEach(function(pat){if(pat.test(t)) score+=3;});
     scores[k]=score;
   }
-  const best=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
-  return (best && best[1]>0) ? best[0] : 'umum';
+  var best=Object.keys(scores).sort(function(a,b){return scores[b]-scores[a];})[0];
+  return (best && scores[best]>0) ? best : 'umum';
 }
 function onIntentInput(val){
   if(!val.trim()){document.getElementById('domainTag').innerHTML='';return;}
-  const dk=detectDomain(val);
-  const d=DOMAINS[dk];
-  document.getElementById('domainTag').innerHTML=`<span class="domain-tag" style="background:${d.bg};color:${d.color}">⚡ Terdeteksi: ${d.label}</span>`;
+  var dk=detectDomain(val);
+  var d=DOMAINS[dk];
+  document.getElementById('domainTag').innerHTML='<span class="domain-tag" style="background:'+d.bg+';color:'+d.color+'">⚡ Terdeteksi: '+d.label+'</span>';
 }
 function detectAndShow(){
-  const val=document.getElementById('intentInput').value.trim();
+  var val=document.getElementById('intentInput').value.trim();
   if(!val){toast('Tulis dulu apa yang mau dibuat!');return;}
   activeDomain=detectDomain(val);
   answers={};
@@ -777,30 +774,35 @@ function detectAndShow(){
   generatePrompt();
 }
 function renderQuestions(dk){
-  const d=DOMAINS[dk];
-  const grid=document.getElementById('questionsGrid');
+  var d=DOMAINS[dk];
+  var grid=document.getElementById('questionsGrid');
   grid.innerHTML='';
-  d.qs.forEach(q=>{
-    const div=document.createElement('div');
+  d.qs.forEach(function(q){
+    var div=document.createElement('div');
     if(q.type==='chip'){
-      div.innerHTML=`<div class="q-label">${q.q}</div><div class="chip-row" id="cr-${q.id}"></div>`;
+      div.innerHTML='<div class="q-label">'+q.q+'</div><div class="chip-row" id="cr-'+q.id+'"></div>';
       grid.appendChild(div);
-      const row=div.querySelector('.chip-row');
-      q.opts.forEach(opt=>{
-        const c=document.createElement('button');
+      var row=div.querySelector('.chip-row');
+      q.opts.forEach(function(opt){
+        var c=document.createElement('button');
         c.className='q-chip';
         c.textContent=opt;
-        c.onclick=()=>{row.querySelectorAll('.q-chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');answers[q.id]=opt;};
+        c.onclick=function(){
+          row.querySelectorAll('.q-chip').forEach(function(x){x.classList.remove('sel');});
+          c.classList.add('sel');
+          answers[q.id]=opt;
+        };
         row.appendChild(c);
       });
     } else {
-      div.innerHTML=`<div class="q-label">${q.q}</div><textarea class="q-text" rows="2" placeholder="${q.ph||''}" oninput="answers['${q.id}']=this.value"></textarea>`;
+      div.innerHTML='<div class="q-label">'+q.q+'</div><textarea class="q-text" rows="2" placeholder="'+(q.ph||'')+'" oninput="answers[\''+q.id+'\']=this.value"></textarea>';
       grid.appendChild(div);
     }
   });
 }
 function applyAnswersToEditor(){
-  const smart=buildSmartPrompt();
+  if(!activeDomain) return;
+  var smart=buildSmartPrompt();
   if(!smart) return;
   document.getElementById('systemPrompt').value=smart.system;
   document.getElementById('userPrompt').value=smart.user;
@@ -810,113 +812,121 @@ function applyAnswersToEditor(){
   scheduleSave();
   toast('Jawaban diterapkan ke editor ✓');
 }
-
 function substituteVars(text){
-  let out=text;
-  vars.forEach(v=>{
+  var out=text;
+  vars.forEach(function(v){
     if(!v.k||!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(v.k)) return;
-    const re=new RegExp('\\{\\{'+v.k+'\\}\\}','g');
+    var re=new RegExp('\\{\\{'+v.k+'\\}\\}','g');
     out=out.replace(re,v.v||'{{'+v.k+'}}');
   });
   return out;
 }
 function compilePrompt(){
-  let sys=document.getElementById('systemPrompt').value;
-  let user=document.getElementById('userPrompt').value;
-  let ctx=document.getElementById('contextPrompt').value;
-  let cons=document.getElementById('constraintPrompt').value;
-  const fmt=document.getElementById('outputFormat').value;
-  const tone=document.getElementById('tone').value;
-  const reasoning=document.getElementById('reasoning').value;
+  var sys=document.getElementById('systemPrompt').value;
+  var user=document.getElementById('userPrompt').value;
+  var ctx=document.getElementById('contextPrompt').value;
+  var cons=document.getElementById('constraintPrompt').value;
+  var fmt=document.getElementById('outputFormat').value;
+  var tone=document.getElementById('tone').value;
+  var reasoning=document.getElementById('reasoning').value;
   sys=substituteVars(sys);user=substituteVars(user);ctx=substituteVars(ctx);cons=substituteVars(cons);
-  if(tone!=='Professional') sys+=(sys?'\n\n':'')+`Tone: ${tone}.`;
+  if(tone!=='Professional') sys+=(sys?'\n\n':'')+'Tone: '+tone+'.';
   if(reasoning!=='Standard') sys+='\n\n'+(reasoning==='Think step by step'?'Think step by step sebelum menjawab.':reasoning==='Chain of thought'?'Tunjukkan chain of thought sebelum jawaban final.':'Paparkan pros dan cons sebelum menyimpulkan.');
-  if(fmt!=='Plain text') sys+=`\n\nFormat respons: ${fmt}.`;
+  if(fmt!=='Plain text') sys+='\n\nFormat respons: '+fmt+'.';
   if(cons) sys+='\n\nBatasan:\n'+cons;
-  let fullUser=user;
+  var fullUser=user;
   if(ctx) fullUser+='\n\nKonteks:\n'+ctx;
   return {system:sys.trim(),user:fullUser.trim()};
 }
 function updateCharCount(){
-  const {system,user}=compilePrompt();
-  document.getElementById('charBadge').textContent=(system.length+user.length).toLocaleString()+' chars';
+  var c=compilePrompt();
+  document.getElementById('charBadge').textContent=(c.system.length+c.user.length).toLocaleString()+' chars';
 }
-
 function buildSmartPrompt(){
-  const intent=substituteVars(document.getElementById('intentInput').value.trim());
+  var intent=substituteVars(document.getElementById('intentInput').value.trim());
   if(!intent||!activeDomain) return null;
-  const dk=activeDomain;
-  let system='',user='';
+  var ans=answers;
+  var dk=activeDomain;
+  var system='',user='';
   if(dk==='app'){
-    const stack=answers.stack||'bebas';const u=answers.user||'end user umum';const scope=answers.scope||'MVP';const detail=answers.detail||'';
-    system=`Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun membangun aplikasi production-grade.`;
-    user=`Tugas kamu: Bantu saya membuat ${intent}.\n\nSpesifikasi teknis:\n- Tech stack: ${stack}\n- Target pengguna: ${u}\n- Scope: ${scope}${detail?'\n- Detail: '+detail:''}\n\nYang saya butuhkan:\n1. Breakdown fitur utama\n2. Arsitektur sistem\n3. Struktur folder / project\n4. Langkah implementasi bertahap\n5. Contoh kode\n\nJANGAN menjelaskan bahwa kamu AI. Langsung eksekusi.`;
+    var stack=ans.stack||'bebas', u=ans.user||'end user umum', scope=ans.scope||'MVP', detail=ans.detail||'';
+    system='Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun membangun aplikasi production-grade.';
+    user='Tugas kamu: Bantu saya membuat '+intent+'.\n\nSpesifikasi teknis:\n- Tech stack: '+stack+'\n- Target pengguna: '+u+'\n- Scope: '+scope+(detail?'\n- Detail: '+detail:'')+'\n\nYang saya butuhkan:\n1. Breakdown fitur utama (core features)\n2. Arsitektur sistem yang direkomendasikan\n3. Struktur folder / project\n4. Komponen / modul utama\n5. Langkah implementasi bertahap\n6. Potensi challenge dan cara mengatasinya\n\nBerikan jawaban konkret, langsung dieksekusi. Sertakan contoh kode jika relevan.';
   } else if(dk==='artikel'){
-    const audience=answers.audience||'umum';const tone=answers.tone||'santai';const length=answers.length||'sedang';const detail=answers.detail||'';
-    system=`Kamu adalah content writer profesional. Tulis dengan engaging, konkret, tanpa basa-basi.`;
-    user=`Tulis artikel tentang ${intent}.\n\nTarget: ${audience}\nTone: ${tone}\nPanjang: ${length}${detail?'\nAngle: '+detail:''}\n\nStruktur: Hook kuat → isi → data/contoh → penutup.`;
+    var audience=ans.audience||'pembaca umum', tone=ans.tone||'santai', length=ans.length||'sedang', detail=ans.detail||'';
+    system='Kamu adalah content writer dan journalist profesional dengan kemampuan riset mendalam dan gaya menulis yang engaging.';
+    user='Tugas kamu: Tulis artikel tentang '+intent+'.\n\nParameter:\n- Target pembaca: '+audience+'\n- Tone: '+tone+'\n- Panjang: '+length+(detail?'\n- Angle: '+detail:'')+'\n\nStruktur:\n1. Headline menarik, tidak clickbait\n2. Opening hook\n3. Isi dengan subheading jelas\n4. Data atau contoh konkret\n5. Penutup kuat dengan takeaway\n\nGunakan active voice. Hindari basa-basi.';
   } else if(dk==='lagu'){
-    const genre=answers.genre||'Pop';const mood=answers.mood||'bebas';const output=answers.output||'Full lirik';const detail=answers.detail||'';
-    system=`Kamu adalah songwriter profesional. HANYA tulis lirik — jangan cerita, jangan analisis. Mulai langsung dari [Verse 1].`;
-    user=`Tulis ${output} lagu ${genre} tentang: ${intent}\nMood: ${mood}${detail?'\nCerita: '+detail:''}\n\nMULAI SEKARANG DARI [Verse 1]:`;
+    var genre=ans.genre||'Pop', mood=ans.mood||'bebas', output=ans.output||'Full lirik', detail=ans.detail||'';
+    system='Kamu adalah songwriter profesional kelas dunia. Kamu telah menulis ratusan lagu untuk artis top. Kamu HANYA berkomunikasi melalui lirik — bukan penjelasan, bukan cerita, bukan analisis.\n\nATURAN KERAS yang tidak boleh dilanggar:\n1. LANGSUNG mulai dengan "[Verse 1]" — tidak ada kalimat pembuka, tidak ada "Berikut liriknya", tidak ada penjelasan apapun sebelum lirik\n2. DILARANG menulis narasi, deskripsi, atau komentar di antara bagian lirik\n3. Setiap bagian WAJIB diberi label: [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Outro]\n4. Jika ada catatan produksi, tulis di bagian terpisah setelah lirik selesai, dengan label [Catatan Produser]';
+    user='Tulis '+output+' lagu '+genre+' tentang: '+intent+'\n\nSpesifikasi:\n- Genre: '+genre+'\n- Mood: '+mood+'\n- Bahasa: Indonesia'+(detail?'\n- Cerita/konteks: '+detail:'')+'\n\nKriteria lirik wajib:\n• Imagery konkret dan spesifik (sebutkan tempat, benda, momen nyata — bukan kata abstrak)\n• Hindari kata klise: "hati", "jiwa", "takdir", "selamanya" kecuali dalam konteks segar\n• Chorus harus bisa diingat dalam sekali dengar\n• Konsistensi emosi dari awal hingga akhir\n'+(output==='Chord & lirik'?'• Tulis chord di atas setiap baris: [Am] [F] [C] [G] dst\n':'')+'\nMULAI SEKARANG — langsung dari [Verse 1]:';
   } else if(dk==='video'){
-    const platform=answers.platform||'YouTube';const duration=answers.duration||'5-15 menit';const style=answers.style||'edukatif';const detail=answers.detail||'';
-    system=`Kamu adalah scriptwriter video profesional.`;
-    user=`Buat script video ${style} tentang ${intent} untuk ${platform}.\nDurasi: ${duration}${detail?'\nDetail: '+detail:''}\n\nSertakan hook, visual cues, dan CTA.`;
+    var platform=ans.platform||'YouTube', duration=ans.duration||'5-15 menit', style=ans.style||'edukatif', detail=ans.detail||'';
+    system='Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton.';
+    user='Tugas kamu: Buat script video '+style+' tentang '+intent+' untuk '+platform+'.\n\nSpesifikasi:\n- Platform: '+platform+'\n- Durasi: '+duration+'\n- Style: '+style+(detail?'\n- Detail: '+detail:'')+'\n\nFormat:\n1. Hook kuat di 5 detik pertama\n2. Opening yang establish topik\n3. Isi dengan transisi smooth\n4. Visual cues / direction\n5. Closing + CTA natural';
   } else if(dk==='desain'){
-    const type=answers.type||'UI/UX';const style=answers.style||'modern';const tool=answers.tool||'Figma';const detail=answers.detail||'';
-    system=`Kamu adalah senior designer.`;
-    user={`Bantu desain ${intent}.\nJenis: ${type}\nGaya: ${style}\nTool: ${tool}${detail?'\nDetail: '+detail:''}\n\nBerikan: konsep, color palette, typography, layout, komponen UI.`;}
-  else {
-    const goal=answers.goal||'buat dari nol';const output=answers.output||'bebas';const detail=answers.detail||'';
-    system=`Kamu adalah expert di bidang yang relevan. Langsung ke inti, jangan bertele-tele.`;
-    user=`Tugas: ${intent}\nTujuan: ${goal}\nFormat: ${output}${detail?'\nInfo: '+detail:''}\n\nBeri jawaban komprehensif dan konkret.`;
+    var type=ans.type||'UI/UX', style=ans.style||'modern', tool=ans.tool||'Figma', detail=ans.detail||'';
+    system='Kamu adalah senior UI/UX designer dengan portofolio produk digital top.';
+    user='Tugas kamu: Bantu saya mendesain '+intent+'.\n\nSpesifikasi:\n- Jenis: '+type+'\n- Gaya visual: '+style+'\n- Tool: '+tool+(detail?'\n- Detail: '+detail:'')+'\n\nYang dibutuhkan:\n1. Konsep visual dan design direction\n2. Color palette (hex code)\n3. Typography pairing\n4. Layout utama dan hierarki informasi\n5. Komponen UI key\n6. Panduan konsistensi';
+  } else {
+    var goal=ans.goal||'buat dari nol', output=ans.output||'bebas', detail=ans.detail||'';
+    system='Kamu adalah expert di bidang yang relevan dengan tugas berikut.';
+    user='Tugas: '+intent+'\n\nKonteks:\n- Tujuan: '+goal+'\n- Format output: '+output+(detail?'\n- Info tambahan: '+detail:'')+'\n\nInstruksi:\n1. Pahami apa yang benar-benar dibutuhkan\n2. Jawaban komprehensif, tidak bertele-tele\n3. Struktur jelas\n4. Sertakan contoh konkret\n5. Sebutkan asumsi yang dibuat';
   }
   return {system:system.trim(),user:user.trim()};
 }
-
 function generatePrompt(){
-  const btn=document.getElementById('genBtn');
+  var btn=document.getElementById('genBtn');
   btn.disabled=true;btn.textContent='⏳ Loading...';
-  setTimeout(()=>{
-    const smart=buildSmartPrompt();
-    let sys,usr;
+  setTimeout(function(){
+    var smart=buildSmartPrompt();
+    var sys,usr;
     if(smart){sys=smart.system;usr=smart.user;}
-    else{const c=compilePrompt();sys=c.system;usr=c.user;}
-    const output=document.getElementById('outputBox');
+    else{var c=compilePrompt();sys=c.system;usr=c.user;}
+    var output=document.getElementById('outputBox');
     output.value=(sys?'[SYSTEM]\n'+sys+'\n\n':'')+'[USER]\n'+usr;
-    document.getElementById('outputMeta').innerHTML=
-      `<span>${(sys.length+usr.length).toLocaleString()} chars</span><span style="margin-left:auto"><button class="sec-btn" style="font-size:11px" onclick="copyActive()">Copy prompt</button></span>`;
+    var total=(sys.length+usr.length).toLocaleString();
+    document.getElementById('outputMeta').innerHTML='<span>'+total+' chars</span><span style="margin-left:auto"><button class="sec-btn" style="font-size:11px" onclick="copyActive()">Copy prompt</button></span>';
     switchTab('output',document.querySelectorAll('.tab-btn')[2]);
     document.getElementById('aiNotice').style.display='flex';
     btn.disabled=false;btn.textContent='⚡ Generate';
     toast('Prompt berhasil di-generate ✓');
   },150);
 }
-
 function switchTab(name,btn){
   currentTab=name;
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('show');});
   document.getElementById('tab-'+name).classList.add('show');
   if(name==='preview') renderPreview();
 }
 function renderPreview(){
-  const {system,user}=compilePrompt();
-  let html='';
-  if(system) html+=`<span class="preview-sys">[SYSTEM]\n${escHtml(system)}</span>\n\n`;
-  html+=`<span class="preview-usr">[USER]\n${escHtml(user)}</span>`;
+  var c=compilePrompt();
+  var html='';
+  if(c.system) html+='<span class="preview-sys">[SYSTEM]\n'+escHtml(c.system)+'</span>\n\n';
+  html+='<span class="preview-usr">[USER]\n'+escHtml(c.user)+'</span>';
   document.getElementById('previewBox').innerHTML=html;
 }
 function copyActive(){
-  let text='';
-  if(currentTab==='output') text=document.getElementById('outputBox').value;
-  else {const {system,user}=compilePrompt();text=(system?'[SYSTEM]\n'+system+'\n\n':'')+'[USER]\n'+user;}
-  if(!text||text.trim()==='Prompt yang di-generate akan muncul di sini.'){toast('Belum ada prompt!');return;}
-  navigator.clipboard.writeText(text).then(()=>toast('Prompt di-copy ✓')).catch(()=>toast('Gagal copy, coba manual.'));
+  var text='';
+  if(currentTab==='preview'){
+    var c=compilePrompt();
+    text=(c.system?'[SYSTEM]\n'+c.system+'\n\n':'')+'[USER]\n'+c.user;
+  } else if(currentTab==='output'){
+    text=document.getElementById('outputBox').value;
+  } else {
+    var c=compilePrompt();
+    text=(c.system?'[SYSTEM]\n'+c.system+'\n\n':'')+'[USER]\n'+c.user;
+  }
+  if(!text||text.trim()==='Prompt yang di-generate akan muncul di sini.'){toast('Belum ada prompt untuk di-copy!');return;}
+  navigator.clipboard.writeText(text).then(function(){toast('Prompt di-copy ke clipboard ✓');}).catch(function(){
+    var ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    toast('Prompt di-copy ✓');
+  });
 }
-
 function resetAll(){
   document.getElementById('intentInput').value='';
   document.getElementById('domainTag').innerHTML='';
@@ -935,15 +945,17 @@ function resetAll(){
   vars=[];renderVars();
   activeDomain=null;answers={};
   updateCharCount();
-  document.querySelectorAll('.tmpl-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tmpl-btn').forEach(function(b){b.classList.remove('active');});
   localStorage.removeItem('pb_state');
-  toast('Semua direset');
+  toast('Semua field sudah direset');
 }
-
-function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveToStorage,800);}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveToStorage,800);
+}
 function saveToStorage(){
   try{
-    const state={
+    var state={
       intent:document.getElementById('intentInput').value,
       sys:document.getElementById('systemPrompt').value,
       user:document.getElementById('userPrompt').value,
@@ -952,14 +964,14 @@ function saveToStorage(){
       format:document.getElementById('outputFormat').value,
       tone:document.getElementById('tone').value,
       reasoning:document.getElementById('reasoning').value,
-      vars,isDark,
+      vars:vars,isDark:isDark
     };
     localStorage.setItem('pb_state',JSON.stringify(state));
     document.getElementById('autosaveIndicator').innerHTML='<span class="dot2"></span>Tersimpan';
   }catch(e){}
 }
 function loadFromStorage(){
-  try{const raw=localStorage.getItem('pb_state');return raw?JSON.parse(raw):null;}catch(e){return null;}
+  try{var raw=localStorage.getItem('pb_state');return raw?JSON.parse(raw):null;}catch(e){return null;}
 }
 function restoreState(s){
   document.getElementById('intentInput').value=s.intent||'';
