@@ -3,234 +3,515 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prompt Builder v4 — AI Prompt Consultant</title>
+<title>Prompt Builder v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0f0f0f;--bg2:#161616;--bg3:#1e1e1e;--bg4:#252525;
-  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
-  --text:#e8e6e0;--text2:#8a8880;--text3:#4a4846;
-  --accent:#c8a96e;--accent2:#a08040;
-  --blue:#5b9bd5;--teal:#4db89a;--coral:#d4614a;--purple:#8b7dd8;--green:#6aaa5a;--amber:#d4923a;
-  --radius:10px;--radius-lg:16px;
-  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-  --mono:'JetBrains Mono','Fira Code',monospace;
-  --shadow:0 4px 20px rgba(0,0,0,.4);
+  --bg:#0a0a0a;--bg2:#111111;--bg3:#181818;--bg4:#1f1f1f;--bg5:#252525;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);--border3:rgba(255,255,255,.22);
+  --text:#e8e5de;--text2:#7a7872;--text3:#3a3834;
+  --accent:#c8a96e;--accent2:rgba(200,169,110,.15);--accentb:#0f0f0f;
+  --blue:#5b9bd5;--teal:#3db88a;--coral:#d4614a;--purple:#8b7dd8;--green:#5aaa4a;--amber:#d4923a;--pink:#d46aad;
+  --r:8px;--rlg:12px;
+  --font:'Syne',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --shadow:0 8px 32px rgba(0,0,0,.6);
 }
 [data-theme="light"] {
-  --bg:#f5f4f0;--bg2:#ede9e3;--bg3:#e2ddd6;--bg4:#d8d2ca;
-  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.2);
-  --text:#1a1816;--text2:#6a6560;--text3:#9a9590;
-  --accent:#8a6020;--accent2:#6a4810;
-  --blue:#1a5fa5;--teal:#0a7856;--coral:#b84030;--purple:#5b4da8;--green:#3a8a2a;--amber:#b06010;
-  --shadow:0 4px 20px rgba(0,0,0,.1);
+  --bg:#f0ede6;--bg2:#e8e4dc;--bg3:#ddd9d0;--bg4:#d5d0c6;--bg5:#ccc7bc;
+  --border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.16);--border3:rgba(0,0,0,.26);
+  --text:#1a1714;--text2:#5a5650;--text3:#9a9590;
+  --accent:#8a5e18;--accent2:rgba(138,94,24,.12);--accentb:#fff8f0;
+  --shadow:0 8px 32px rgba(0,0,0,.12);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;transition:background .2s,color .2s}
-button{font-family:var(--font);cursor:pointer}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg4);border:0.5px solid var(--border2);border-radius:var(--radius);padding:8px 18px;font-size:12px;color:var(--text);z-index:999;transition:transform .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.6;transition:background .2s,color .2s;overflow:hidden}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg4);border:.5px solid var(--border3);border-radius:var(--r);padding:8px 16px;font-size:12px;font-family:var(--mono);color:var(--text);z-index:9999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap}
 #toast.show{transform:translateX(-50%) translateY(0)}
-[data-tip]{position:relative}
-[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg4);border:0.5px solid var(--border2);color:var(--text);font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100}
-[data-tip]:hover::after{opacity:1}
-#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50}
+
+/* ── OVERLAY ── */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;backdrop-filter:blur(2px)}
 #overlay.show{display:block}
-header{padding:14px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg2);flex-wrap:wrap}
-.logo{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#0f0f0f;flex-shrink:0}
-.header-title{font-size:15px;font-weight:600}
-.header-sub{font-size:11px;color:var(--text2);margin-top:1px}
-.header-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.header-badge{font-size:10px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--accent2);color:var(--accent);letter-spacing:.04em}
-.icon-btn{width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.icon-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
-.app{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 57px)}
-.sidebar{background:var(--bg2);border-right:0.5px solid var(--border);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:18px}
-.sec-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
-.tmpl-btn{width:100%;text-align:left;background:transparent;border:0.5px solid transparent;border-radius:var(--radius);padding:8px 10px;cursor:pointer;transition:all .15s;color:var(--text)}
+
+/* ── HEADER ── */
+header{
+  padding:10px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;gap:10px;background:var(--bg2);
+  flex-wrap:wrap;flex-shrink:0;
+}
+.logo{
+  width:28px;height:28px;background:var(--accent);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;color:#0a0a0a;flex-shrink:0;letter-spacing:-.5px;
+}
+.header-title{font-size:14px;font-weight:700;letter-spacing:-.3px}
+.header-sub{font-size:10px;color:var(--text2);margin-top:1px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hbadge{font-size:9px;padding:2px 8px;border-radius:20px;border:.5px solid var(--accent);color:var(--accent);letter-spacing:.05em;font-family:var(--mono)}
+.ibtn{
+  height:30px;min-width:30px;padding:0 8px;border-radius:6px;border:.5px solid var(--border);
+  background:transparent;color:var(--text2);font-size:13px;display:flex;align-items:center;
+  justify-content:center;transition:all .15s;cursor:pointer;gap:4px;font-family:var(--font);
+}
+.ibtn:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.ibtn.accent{background:var(--accent);color:var(--accentb);border-color:var(--accent);font-weight:600}
+.ibtn.accent:hover{opacity:.88}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:240px 1fr;height:calc(100vh - 49px)}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--bg2);border-right:.5px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.sb-section{padding:12px;border-bottom:.5px solid var(--border)}
+.sec-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.tmpl-btn{
+  width:100%;text-align:left;background:transparent;border:.5px solid transparent;
+  border-radius:var(--r);padding:7px 9px;cursor:pointer;transition:all .15s;color:var(--text);
+  display:flex;align-items:center;gap:8px;font-family:var(--font);
+}
 .tmpl-btn:hover{background:var(--bg3);border-color:var(--border)}
 .tmpl-btn.active{background:var(--bg3);border-color:var(--border2)}
-.tmpl-btn .t-icon{font-size:15px;display:block;margin-bottom:3px}
-.tmpl-btn .t-name{font-size:12px;font-weight:600;display:block}
-.tmpl-btn .t-desc{font-size:11px;color:var(--text2);display:block;margin-top:1px}
-.blocks-wrap{display:flex;flex-wrap:wrap;gap:5px}
-.block-chip{padding:4px 10px;border-radius:20px;border:0.5px solid var(--border);font-size:11px;cursor:pointer;transition:all .15s;color:var(--text2);background:transparent;display:flex;align-items:center;gap:5px}
-.block-chip:hover{border-color:var(--border2);color:var(--text);background:var(--bg3)}
+.tmpl-icon{font-size:14px;flex-shrink:0}
+.tmpl-info .t-name{font-size:12px;font-weight:600;display:block}
+.tmpl-info .t-desc{font-size:10px;color:var(--text2);display:block}
+.cat-lbl{
+  font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.1em;padding:10px 9px 4px;
+}
+.blocks-wrap{display:flex;flex-wrap:wrap;gap:4px}
+.bchip{
+  padding:3px 9px;border-radius:20px;border:.5px solid var(--border);font-size:10px;
+  cursor:pointer;transition:all .15s;color:var(--text2);background:transparent;
+  display:flex;align-items:center;gap:4px;font-family:var(--mono);
+}
+.bchip:hover{border-color:var(--border2);color:var(--text);background:var(--bg3)}
 .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.var-row{display:grid;grid-template-columns:1fr 1fr auto;gap:5px;margin-bottom:5px;align-items:center}
-.var-row input{background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;font-family:var(--mono);color:var(--text);width:100%;transition:border-color .15s}
+.var-row{display:grid;grid-template-columns:1fr 1fr auto;gap:4px;margin-bottom:4px;align-items:center}
+.var-row input{
+  background:var(--bg3);border:.5px solid var(--border);border-radius:5px;
+  padding:4px 7px;font-size:10px;font-family:var(--mono);color:var(--text);
+  width:100%;transition:border-color .15s;
+}
 .var-row input:focus{outline:none;border-color:var(--border2)}
 .var-row input.invalid{border-color:var(--coral)}
-.del-btn{width:24px;height:24px;border-radius:6px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text3);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.del-btn:hover{background:rgba(212,97,74,.15);color:var(--coral);border-color:rgba(212,97,74,.3)}
-.add-var-btn{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:4px 0;text-align:left}
-.add-var-btn:hover{text-decoration:underline}
+.delbtn{
+  width:22px;height:22px;border-radius:5px;border:.5px solid var(--border);
+  background:transparent;cursor:pointer;color:var(--text3);font-size:13px;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;
+}
+.delbtn:hover{background:rgba(212,97,74,.15);color:var(--coral);border-color:rgba(212,97,74,.3)}
+.addvar{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:4px 0;font-family:var(--font)}
+.addvar:hover{text-decoration:underline}
+
+/* ── HISTORY PANEL ── */
+.hist-item{
+  padding:6px 9px;border-radius:6px;border:.5px solid var(--border);
+  font-size:10px;cursor:pointer;transition:all .15s;margin-bottom:4px;
+  color:var(--text2);background:transparent;text-align:left;width:100%;font-family:var(--mono);
+}
+.hist-item:hover{background:var(--bg3);border-color:var(--border2);color:var(--text)}
+.hist-time{font-size:9px;color:var(--text3);margin-top:2px}
+.hist-clear{font-size:10px;color:var(--coral);background:none;border:none;cursor:pointer;font-family:var(--font)}
+.hist-clear:hover{text-decoration:underline}
+
+/* ── MAIN ── */
 .main{display:flex;flex-direction:column;overflow:hidden}
-.intent-bar{padding:14px 18px;border-bottom:0.5px solid var(--border);display:flex;flex-direction:column;gap:7px}
-.intent-wrap{display:flex;gap:8px;align-items:flex-start}
-.intent-input{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-size:14px;font-family:var(--font);color:var(--text);resize:none;transition:border-color .15s;line-height:1.5}
+
+/* ── INTENT BAR ── */
+.intent-bar{padding:12px 16px;border-bottom:.5px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.intent-wrap{display:flex;gap:6px;align-items:flex-start}
+.intent-input{
+  flex:1;background:var(--bg3);border:.5px solid var(--border);border-radius:var(--r);
+  padding:8px 12px;font-size:13px;font-family:var(--font);color:var(--text);
+  resize:none;transition:border-color .15s;line-height:1.5;
+}
 .intent-input:focus{outline:none;border-color:var(--border2)}
 .intent-input::placeholder{color:var(--text3)}
-.detect-btn{padding:9px 16px;background:var(--accent);color:#0f0f0f;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap;align-self:stretch}
-.detect-btn:hover{opacity:.88}
-.detect-btn:disabled{opacity:.4;cursor:not-allowed}
-.deep-btn{padding:9px 16px;background:#8b5cf6;color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap;margin-left:6px}
+.gen-primary{
+  padding:8px 16px;background:var(--accent);color:var(--accentb);border:none;border-radius:var(--r);
+  font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s;white-space:nowrap;
+  font-family:var(--font);letter-spacing:-.2px;align-self:stretch;
+}
+.gen-primary:hover{opacity:.88}
+.gen-primary:disabled{opacity:.4;cursor:not-allowed}
+.deep-btn{
+  padding:8px 14px;background:#5b3db8;color:#e8e0ff;border:none;border-radius:var(--r);
+  font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s;white-space:nowrap;
+  font-family:var(--font);letter-spacing:-.2px;align-self:stretch;
+}
 .deep-btn:hover{opacity:.88}
 .deep-btn:disabled{opacity:.4;cursor:not-allowed}
-.domain-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;min-height:20px}
-.notice{background:rgba(91,155,213,.08);border:0.5px solid rgba(91,155,213,.2);border-radius:8px;padding:7px 12px;font-size:11px;color:var(--blue);display:flex;align-items:center;gap:7px}
-.questions-area{padding:10px 18px;border-bottom:0.5px solid var(--border);display:none}
+.domain-tag{
+  display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 10px;
+  border-radius:20px;font-weight:600;font-family:var(--mono);
+}
+.meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.token-badge{
+  font-size:10px;font-family:var(--mono);color:var(--text2);
+  background:var(--bg3);border:.5px solid var(--border);border-radius:4px;
+  padding:2px 7px;
+}
+.token-badge span{color:var(--text)}
+
+/* ── QUESTIONS ── */
+.questions-area{padding:10px 16px;border-bottom:.5px solid var(--border);display:none;flex-shrink:0}
 .questions-area.show{display:block}
 .q-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.q-label{font-size:11px;color:var(--text2);margin-bottom:5px}
-.chip-row{display:flex;flex-wrap:wrap;gap:4px}
-.q-chip{padding:4px 10px;border-radius:20px;border:0.5px solid var(--border);font-size:11px;cursor:pointer;transition:all .15s;color:var(--text2);background:transparent}
-.q-chip:hover{border-color:var(--border2);color:var(--text)}
-.q-chip.sel{border-color:var(--accent2);color:var(--accent);background:rgba(200,169,110,.08)}
-.q-text{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:var(--font);color:var(--text);resize:none;transition:border-color .15s}
+.q-label{font-size:10px;color:var(--text2);margin-bottom:5px;font-weight:600}
+.chip-row{display:flex;flex-wrap:wrap;gap:3px}
+.qchip{
+  padding:3px 9px;border-radius:20px;border:.5px solid var(--border);
+  font-size:10px;cursor:pointer;transition:all .15s;color:var(--text2);
+  background:transparent;font-family:var(--mono);
+}
+.qchip:hover{border-color:var(--border2);color:var(--text)}
+.qchip.sel{border-color:var(--accent);color:var(--accent);background:var(--accent2)}
+.q-text{
+  width:100%;background:var(--bg3);border:.5px solid var(--border);border-radius:5px;
+  padding:5px 8px;font-size:11px;font-family:var(--font);color:var(--text);
+  resize:none;transition:border-color .15s;
+}
 .q-text:focus{outline:none;border-color:var(--border2)}
+
+/* ── EDITOR ── */
 .editor-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.tabs{display:flex;border-bottom:0.5px solid var(--border);padding:0 18px}
-.tab-btn{padding:8px 13px;font-size:12px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--text2);transition:all .15s;margin-bottom:-.5px}
+.tabs{display:flex;border-bottom:.5px solid var(--border);padding:0 16px;flex-shrink:0;background:var(--bg2)}
+.tab-btn{
+  padding:8px 12px;font-size:11px;background:none;border:none;border-bottom:2px solid transparent;
+  cursor:pointer;color:var(--text2);transition:all .15s;margin-bottom:-.5px;font-family:var(--font);font-weight:600;
+}
 .tab-btn.active{color:var(--text);border-bottom-color:var(--accent)}
 .tab-btn:hover:not(.active){color:var(--text)}
-.tab-pane{display:none;flex:1;overflow-y:auto;padding:14px 18px}
-.tab-pane.show{display:flex;flex-direction:column;gap:11px}
-.field-label{font-size:11px;color:var(--text2);margin-bottom:5px;display:flex;align-items:center;gap:6px}
-.field-badge{font-size:9px;padding:1px 6px;border-radius:10px;background:rgba(200,169,110,.15);color:var(--accent);font-weight:600;letter-spacing:.04em}
-textarea.field,select.field{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:var(--mono);color:var(--text);resize:vertical;transition:border-color .15s;line-height:1.6}
-select.field{font-family:var(--font);cursor:pointer;resize:none}
+.tab-pane{display:none;flex:1;overflow-y:auto;padding:12px 16px}
+.tab-pane.show{display:flex;flex-direction:column;gap:10px}
+.flabel{font-size:10px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px;font-weight:600}
+.fbadge{font-size:8px;padding:1px 5px;border-radius:8px;background:var(--accent2);color:var(--accent);font-weight:700;letter-spacing:.05em}
+textarea.field,select.field{
+  width:100%;background:var(--bg3);border:.5px solid var(--border);border-radius:var(--r);
+  padding:8px 11px;font-size:12px;font-family:var(--mono);color:var(--text);
+  resize:vertical;transition:border-color .15s;line-height:1.6;
+}
+select.field{font-family:var(--font);cursor:pointer;resize:none;font-size:12px}
 textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)}
-.config-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.config-item label{font-size:11px;color:var(--text2);display:block;margin-bottom:4px}
-.preview-box,.output-box{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;font-size:12px;font-family:var(--mono);line-height:1.8;white-space:pre-wrap;word-break:break-word;flex:1;min-height:100px;transition:background .2s}
-.preview-sys{color:var(--blue)}
-.preview-usr{color:var(--text)}
-.output-meta{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--text3);flex-wrap:wrap}
-.ai-send-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.ai-send-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .15s;cursor:pointer}
-.ai-send-btn:hover{filter:brightness(1.2);border-color:var(--accent2)}
-.ai-send-btn.chatgpt{background:#212121;color:#74aa9c;border-color:#74aa9c40}
-.ai-send-btn.deepseek{background:#212121;color:#4d6bfe;border-color:#4d6bfe40}
-.ai-send-btn.claude{background:#212121;color:#d97757;border-color:#d9775740}
-.ai-send-btn.gemini{background:#212121;color:#8e7cc3;border-color:#8e7cc340}
-.ai-send-btn.grok{background:#212121;color:#e04040;border-color:#e0404040}
-.bottom-bar{padding:10px 18px;border-top:0.5px solid var(--border);display:flex;align-items:center;gap:7px;background:var(--bg2);flex-wrap:wrap}
-.char-badge{font-size:11px;color:var(--text3);font-family:var(--mono);margin-right:auto}
-.gen-btn{padding:8px 18px;background:var(--accent);color:#0f0f0f;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
-.gen-btn:hover{opacity:.88}
-.gen-btn:disabled{opacity:.4;cursor:not-allowed}
-.sec-btn{padding:8px 13px;background:transparent;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--text2);cursor:pointer;transition:all .15s}
-.sec-btn:hover{border-color:var(--border2);color:var(--text)}
-.autosave{font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px}
-.autosave .dot2{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.config-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.config-item label{font-size:10px;color:var(--text2);display:block;margin-bottom:3px;font-weight:600}
+
+/* ── PREVIEW ── */
+.preview-box{
+  background:var(--bg3);border:.5px solid var(--border);border-radius:var(--r);
+  padding:12px;font-size:11px;font-family:var(--mono);line-height:1.8;
+  white-space:pre-wrap;word-break:break-word;flex:1;min-height:100px;
+}
+.p-sys{color:var(--blue)}
+.p-usr{color:var(--text)}
+
+/* ── OUTPUT ── */
+.output-box{
+  resize:vertical;min-height:180px;flex:1;
+  background:var(--bg3);border:.5px solid var(--border);border-radius:var(--r);
+  padding:12px;font-size:11px;font-family:var(--mono);line-height:1.8;
+  white-space:pre-wrap;word-break:break-word;color:var(--text);
+  transition:border-color .15s;
+}
+.output-box:focus{outline:none;border-color:var(--border2)}
+.output-box.editable{border-color:var(--accent)}
+.ai-send-row{display:flex;gap:5px;flex-wrap:wrap}
+.aisend{
+  padding:5px 11px;border-radius:16px;border:.5px solid var(--border2);
+  background:var(--bg3);color:var(--text);font-size:10px;font-weight:700;
+  display:flex;align-items:center;gap:4px;transition:all .15s;cursor:pointer;font-family:var(--font);
+}
+.aisend:hover{filter:brightness(1.25);border-color:var(--accent)}
+.aisend.chatgpt{color:#74aa9c;border-color:rgba(116,170,156,.35)}
+.aisend.deepseek{color:#4d6bfe;border-color:rgba(77,107,254,.35)}
+.aisend.claude{color:#d97757;border-color:rgba(217,119,87,.35)}
+.aisend.gemini{color:#8e7cc3;border-color:rgba(142,124,195,.35)}
+.aisend.grok{color:#e06060;border-color:rgba(224,96,96,.35)}
+.output-meta{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text3);flex-wrap:wrap;font-family:var(--mono)}
+.edit-toggle{
+  font-size:10px;color:var(--blue);background:none;border:none;cursor:pointer;
+  font-family:var(--font);padding:0;
+}
+.edit-toggle:hover{text-decoration:underline}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{
+  padding:8px 16px;border-top:.5px solid var(--border);
+  display:flex;align-items:center;gap:6px;background:var(--bg2);flex-wrap:wrap;flex-shrink:0;
+}
+.autosave{font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px;font-family:var(--mono)}
+.save-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.char-badge{font-size:10px;color:var(--text3);font-family:var(--mono);display:flex;align-items:center;gap:6px}
+.sbtn{
+  padding:6px 12px;background:transparent;border:.5px solid var(--border);border-radius:var(--r);
+  font-size:11px;color:var(--text2);cursor:pointer;transition:all .15s;font-family:var(--font);
+}
+.sbtn:hover{border-color:var(--border2);color:var(--text)}
+.genbtn{
+  padding:7px 16px;background:var(--accent);color:var(--accentb);border:none;border-radius:var(--r);
+  font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s;font-family:var(--font);letter-spacing:-.2px;
+}
+.genbtn:hover{opacity:.88}
+.genbtn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── DEEP ASK CHAT ── */
+.chat-panel{
+  display:none;background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r);
+  padding:12px;margin:10px 16px 0;max-height:260px;flex-direction:column;gap:8px;
+  flex-shrink:0;
+}
+.chat-panel.show{display:flex}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.cbubble{
+  max-width:88%;padding:7px 11px;border-radius:10px;font-size:11px;
+  line-height:1.5;word-break:break-word;font-family:var(--mono);
+}
+.cbubble.ai{align-self:flex-start;background:var(--bg3);border:.5px solid var(--border);color:var(--text)}
+.cbubble.user{align-self:flex-end;background:var(--accent);color:var(--accentb)}
+.chat-inp-row{display:flex;gap:5px}
+.chat-inp-row input{
+  flex:1;background:var(--bg3);border:.5px solid var(--border);border-radius:16px;
+  padding:6px 11px;color:var(--text);font-size:11px;font-family:var(--font);
+  transition:border-color .15s;
+}
+.chat-inp-row input:focus{outline:none;border-color:var(--border2)}
+.chat-inp-row button{
+  background:var(--accent);border:none;border-radius:16px;padding:6px 13px;
+  color:var(--accentb);font-weight:700;cursor:pointer;font-family:var(--font);font-size:11px;
+}
+.typing{display:flex;gap:3px;padding:8px 11px;align-self:flex-start;background:var(--bg3);border:.5px solid var(--border);border-radius:10px}
+.typing span{width:5px;height:5px;background:var(--text2);border-radius:50%;animation:bounce .8s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+/* ── API KEY MODAL ── */
+#apiModal{
+  display:none;position:fixed;inset:0;z-index:200;
+  align-items:center;justify-content:center;background:rgba(0,0,0,.6);
+}
+#apiModal.show{display:flex}
+.modal-box{
+  background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--rlg);
+  padding:20px;width:380px;
+}
+.modal-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:11px;color:var(--text2);margin-bottom:14px}
+.modal-inp{
+  width:100%;background:var(--bg3);border:.5px solid var(--border2);border-radius:var(--r);
+  padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text);margin-bottom:10px;
+}
+.modal-inp:focus{outline:none;border-color:var(--accent)}
+.modal-row{display:flex;gap:8px;justify-content:flex-end}
+.modal-cancel{
+  padding:7px 14px;background:transparent;border:.5px solid var(--border2);border-radius:var(--r);
+  font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--font);
+}
+.modal-save{
+  padding:7px 14px;background:var(--accent);color:var(--accentb);border:none;border-radius:var(--r);
+  font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);
+}
+.model-select-row{margin-bottom:10px}
+.model-select-row label{font-size:10px;color:var(--text2);font-weight:600;display:block;margin-bottom:4px}
+.model-select-row select{
+  width:100%;background:var(--bg3);border:.5px solid var(--border2);border-radius:var(--r);
+  padding:7px 10px;font-size:12px;font-family:var(--font);color:var(--text);cursor:pointer;
+}
+
+/* ── EXPORT MODAL ── */
+#exportModal{
+  display:none;position:fixed;inset:0;z-index:200;
+  align-items:center;justify-content:center;background:rgba(0,0,0,.6);
+}
+#exportModal.show{display:flex}
+
+/* ── SHORTCUT HINT ── */
+.shortcuts{display:flex;gap:10px;flex-wrap:wrap;padding:8px 16px;border-bottom:.5px solid var(--border);flex-shrink:0;background:var(--bg)}
+.sc{font-size:9px;color:var(--text3);font-family:var(--mono)}
+.sc kbd{
+  background:var(--bg3);border:.5px solid var(--border2);border-radius:3px;
+  padding:1px 5px;color:var(--text2);font-size:9px;font-family:var(--mono);
+}
+
+/* ── NOTICE ── */
+.notice{
+  background:rgba(91,155,213,.08);border:.5px solid rgba(91,155,213,.2);
+  border-radius:6px;padding:5px 10px;font-size:10px;color:var(--blue);display:flex;align-items:center;gap:5px;
+}
+
+/* ── ANIM ── */
 @keyframes blink{0%,100%{background:var(--bg3)}50%{background:rgba(200,169,110,.15)}}
 .blinked{animation:blink .5s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fadein{animation:fadein .2s ease}
+
+/* ── MOBILE ── */
 .hamburger{display:none}
-.api-key-area{display:flex;align-items:center;gap:4px;font-size:11px}
-.api-key-input{background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);width:160px;font-size:11px;font-family:var(--mono)}
-.chat-panel{display:none;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin:10px 18px;max-height:300px;overflow-y:auto;flex-direction:column;gap:8px}
-.chat-panel.show{display:flex}
-.chat-bubble{max-width:85%;padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.5;word-break:break-word}
-.chat-bubble.ai{align-self:flex-start;background:var(--bg3);border:0.5px solid var(--border)}
-.chat-bubble.user{align-self:flex-end;background:var(--accent);color:#0f0f0f}
-.chat-input-row{display:flex;gap:6px;margin-top:8px}
-.chat-input-row input{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:20px;padding:7px 12px;color:var(--text);font-size:12px}
-.chat-input-row button{background:var(--accent);border:none;border-radius:20px;padding:7px 14px;color:#0f0f0f;font-weight:600;cursor:pointer}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 @media(max-width:820px){
-  .app{grid-template-columns:1fr}
-  .sidebar{position:fixed;left:-280px;top:0;height:100vh;width:270px;z-index:60;transition:left .25s cubic-bezier(.4,0,.2,1);border-right:0.5px solid var(--border2)}
+  body{overflow:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .sidebar{position:fixed;left:-260px;top:0;height:100vh;width:250px;z-index:60;transition:left .25s;border-right:.5px solid var(--border2)}
   .sidebar.open{left:0}
   .hamburger{display:flex}
   .q-grid{grid-template-columns:1fr}
   .config-row{grid-template-columns:1fr}
-  .intent-input{font-size:13px}
+  .shortcuts{display:none}
+  .editor-area{min-height:400px}
 }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div id="toast"></div>
 <div id="overlay" onclick="closeSidebar()"></div>
 
+<!-- API Key Modal -->
+<div id="apiModal">
+  <div class="modal-box">
+    <div class="modal-title">🔑 Gemini API Key</div>
+    <div class="modal-sub">Diperlukan untuk fitur Deep Ask. Key disimpan di localStorage browser kamu.</div>
+    <div class="model-select-row">
+      <label>Model Gemini</label>
+      <select id="modelSelect">
+        <option value="gemini-2.0-flash">gemini-2.0-flash (recommended)</option>
+        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+      </select>
+    </div>
+    <input type="password" id="apiKeyInput" class="modal-inp" placeholder="AIzaSy...">
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="closeApiModal()">Batal</button>
+      <button class="modal-save" onclick="saveApiKey()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal">
+  <div class="modal-box">
+    <div class="modal-title">📤 Export Prompt</div>
+    <div class="modal-sub" style="margin-bottom:12px">Pilih format export</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+      <button class="sbtn" style="text-align:left;width:100%;padding:8px 12px" onclick="exportAs('json')">📄 Export sebagai JSON (bisa di-import kembali)</button>
+      <button class="sbtn" style="text-align:left;width:100%;padding:8px 12px" onclick="exportAs('txt')">📃 Export sebagai TXT (siap paste ke AI)</button>
+      <button class="sbtn" style="text-align:left;width:100%;padding:8px 12px" onclick="exportAs('url')">🔗 Copy shareable URL (encode ke base64)</button>
+      <button class="sbtn" style="text-align:left;width:100%;padding:8px 12px" onclick="exportAs('import')">📥 Import dari JSON</button>
+    </div>
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="document.getElementById('exportModal').classList.remove('show')">Tutup</button>
+    </div>
+  </div>
+</div>
+
 <header>
-  <button class="icon-btn hamburger" onclick="openSidebar()" data-tip="Menu">☰</button>
-  <div class="logo">P</div>
+  <button class="ibtn hamburger" onclick="openSidebar()">☰</button>
+  <div class="logo">PB</div>
   <div>
     <div class="header-title">Prompt Builder</div>
     <div class="header-sub">Ketik singkat → dapat prompt tajam</div>
   </div>
   <div class="header-right">
-    <div class="api-key-area">
-      <input type="password" id="apiKeyInput" class="api-key-input" placeholder="Gemini API Key" onchange="saveApiKey()">
-      <button class="icon-btn" data-tip="Simpan API Key" onclick="saveApiKey()">🔑</button>
-    </div>
-    <span class="autosave" id="autosaveIndicator" data-tip="Auto-save aktif"><span class="dot2"></span>Tersimpan</span>
-    <div class="header-badge">v4.0</div>
-    <button class="icon-btn" onclick="toggleTheme()" data-tip="Toggle dark/light mode" id="themeBtn">🌙</button>
+    <span class="autosave" id="autosave"><span class="save-dot"></span>Tersimpan</span>
+    <span class="hbadge">v5.0</span>
+    <button class="ibtn" onclick="openExportModal()">📤 Export</button>
+    <button class="ibtn" onclick="openApiModal()">🔑 API</button>
+    <button class="ibtn" onclick="toggleTheme()" id="themeBtn">🌙</button>
   </div>
 </header>
 
 <div class="app">
+  <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
-    <div>
-      <div class="sec-label">Templates</div>
-      <div id="tmplGrid" style="display:flex;flex-direction:column;gap:3px"></div>
+    <div class="sb-section">
+      <div class="sec-lbl">Templates</div>
+      <div id="tmplGrid"></div>
     </div>
-    <div>
-      <div class="sec-label">Insert block</div>
+    <div class="sb-section">
+      <div class="sec-lbl">Insert Block</div>
       <div class="blocks-wrap" id="blockChips"></div>
     </div>
-    <div style="flex:1">
-      <div class="sec-label">Variables</div>
+    <div class="sb-section" style="flex:1">
+      <div class="sec-lbl">Variables</div>
       <div id="varRows"></div>
-      <button class="add-var-btn" onclick="addVar()" data-tip="Tambah variabel baru">+ Tambah variabel</button>
+      <button class="addvar" onclick="addVar()">+ Tambah variabel</button>
+    </div>
+    <div class="sb-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sec-lbl" style="margin:0">History</div>
+        <button class="hist-clear" onclick="clearHistory()">Hapus</button>
+      </div>
+      <div id="histList"></div>
     </div>
   </div>
 
+  <!-- MAIN -->
   <div class="main">
+    <!-- INTENT -->
     <div class="intent-bar">
       <div class="intent-wrap">
         <textarea class="intent-input" id="intentInput" rows="2"
-          placeholder="Ketik apa yang mau dibuat... contoh: bikin aplikasi manajemen tugas, lagu pop tentang hujan, artikel tentang AI"
+          placeholder="Ketik apa yang mau dibuat... contoh: aplikasi manajemen tugas pakai Next.js, lagu pop tentang rindu, artikel tentang AI generatif"
           oninput="onIntentInput(this.value)"></textarea>
-        <button class="detect-btn" id="detectBtn" onclick="detectAndShow()" data-tip="Deteksi domain & tampilkan pertanyaan">Generate →</button>
-        <button class="deep-btn" id="deepAskBtn" onclick="startDeepAsk()" data-tip="Konsultasi dulu dengan AI sebelum prompt dibuat">🧠 Deep Ask</button>
+        <button class="gen-primary" id="detectBtn" onclick="detectAndShow()">Generate →</button>
+        <button class="deep-btn" id="deepBtn" onclick="startDeepAsk()">🧠 Deep Ask</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="meta-row">
         <div id="domainTag"></div>
-        <div class="notice" id="aiNotice" style="display:none">
-          💡 Prompt ini siap di-copy ke <strong>ChatGPT / Claude / DeepSeek / Gemini / Grok</strong>
-        </div>
+        <div id="tokenBadge" class="token-badge" style="display:none"></div>
+        <div class="notice" id="aiNotice" style="display:none">💡 Siap di-copy ke ChatGPT / Claude / DeepSeek / Gemini / Grok</div>
       </div>
     </div>
 
+    <!-- DEEP ASK CHAT -->
     <div id="chatPanel" class="chat-panel">
-      <div id="chatMessages"></div>
-      <div class="chat-input-row">
-        <input type="text" id="chatUserInput" placeholder="Balas..." onkeypress="if(event.key==='Enter')sendChatMessage()">
-        <button onclick="sendChatMessage()">Kirim</button>
+      <div id="chatMsgs" class="chat-msgs"></div>
+      <div class="chat-inp-row">
+        <input type="text" id="chatInput" placeholder="Balas..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
+        <button onclick="sendChat()">Kirim</button>
       </div>
     </div>
 
+    <!-- QUESTIONS -->
     <div class="questions-area" id="questionsArea">
       <div class="q-grid" id="questionsGrid"></div>
-      <button class="sec-btn" style="margin-top:10px;font-size:11px" onclick="applyAnswersToEditor()">↓ Terapkan ke editor</button>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="sbtn" style="font-size:10px" onclick="applyAnswers()">↓ Terapkan ke editor</button>
+        <button class="sbtn" style="font-size:10px" onclick="document.getElementById('questionsArea').classList.remove('show')">× Tutup</button>
+      </div>
     </div>
 
+    <!-- SHORTCUTS -->
+    <div class="shortcuts">
+      <span class="sc"><kbd>Ctrl+Enter</kbd> Generate</span>
+      <span class="sc"><kbd>Ctrl+Shift+C</kbd> Copy</span>
+      <span class="sc"><kbd>Ctrl+K</kbd> Reset intent</span>
+      <span class="sc"><kbd>Ctrl+E</kbd> Edit output</span>
+      <span class="sc"><kbd>Ctrl+1/2/3</kbd> Tab</span>
+    </div>
+
+    <!-- EDITOR -->
     <div class="editor-area">
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('compose',this)" data-tip="Edit prompt secara manual">Compose</button>
-        <button class="tab-btn" onclick="switchTab('preview',this)" data-tip="Preview prompt yang sudah dikompilasi">Preview</button>
-        <button class="tab-btn" onclick="switchTab('output',this)" data-tip="Hasil generate prompt siap copy">Output</button>
+        <button class="tab-btn active" onclick="switchTab('compose',this)">Compose</button>
+        <button class="tab-btn" onclick="switchTab('preview',this)">Preview</button>
+        <button class="tab-btn" onclick="switchTab('output',this)">Output</button>
       </div>
 
+      <!-- COMPOSE -->
       <div class="tab-pane show" id="tab-compose">
         <div>
-          <div class="field-label">System prompt <span class="field-badge">SYSTEM</span></div>
+          <div class="flabel">System prompt <span class="fbadge">SYSTEM</span></div>
           <textarea class="field" id="systemPrompt" rows="3" placeholder="You are a..."></textarea>
         </div>
         <div class="config-row">
@@ -257,533 +538,432 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
           </div>
         </div>
         <div>
-          <div class="field-label">User prompt</div>
-          <textarea class="field" id="userPrompt" rows="4" placeholder="Deskripsi tugas. Gunakan {{variabel}} untuk bagian dinamis..."></textarea>
+          <div class="flabel">User prompt</div>
+          <textarea class="field" id="userPrompt" rows="5" placeholder="Deskripsi tugas. Gunakan {{variabel}} untuk bagian dinamis..."></textarea>
         </div>
         <div>
-          <div class="field-label">Konteks / contoh <span style="color:var(--text3);font-size:10px">(opsional)</span></div>
+          <div class="flabel">Konteks / contoh <span style="color:var(--text3);font-size:9px">(opsional)</span></div>
           <textarea class="field" id="contextPrompt" rows="2" placeholder="Background info, few-shot examples..."></textarea>
         </div>
         <div>
-          <div class="field-label">Constraints</div>
+          <div class="flabel">Constraints</div>
           <textarea class="field" id="constraintPrompt" rows="2" placeholder="Maks 200 kata. Selalu sertakan contoh kode..."></textarea>
         </div>
       </div>
 
+      <!-- PREVIEW -->
       <div class="tab-pane" id="tab-preview">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
-          <div class="field-label" style="margin:0">Compiled prompt preview</div>
-          <button class="sec-btn" style="font-size:11px" onclick="copyActive()" data-tip="Copy preview ini">Copy</button>
+          <div class="flabel" style="margin:0">Compiled prompt</div>
+          <button class="sbtn" style="font-size:10px" onclick="copyActive()">Copy</button>
         </div>
-        <div class="preview-box" id="previewBox">Preview akan update otomatis saat kamu edit...</div>
+        <div class="preview-box" id="previewBox">Preview akan update otomatis...</div>
       </div>
 
+      <!-- OUTPUT -->
       <div class="tab-pane" id="tab-output">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
-          <div class="field-label" style="margin:0">Prompt siap pakai</div>
-          <button class="sec-btn" style="font-size:11px" onclick="copyActive()" data-tip="Copy output ini">Copy</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div class="flabel" style="margin:0">Prompt siap pakai</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="edit-toggle" id="editToggle" onclick="toggleEditOutput()">✎ Edit</button>
+            <button class="sbtn" style="font-size:10px" onclick="copyActive()">Copy</button>
+          </div>
         </div>
-        <textarea class="output-box" id="outputBox" style="resize:vertical;min-height:200px;flex:1" spellcheck="false" readonly>Prompt yang di-generate akan muncul di sini.</textarea>
-        <div class="ai-send-row">
-          <button class="ai-send-btn chatgpt" onclick="sendToAI('chatgpt')">🧠 ChatGPT</button>
-          <button class="ai-send-btn claude" onclick="sendToAI('claude')">📜 Claude</button>
-          <button class="ai-send-btn deepseek" onclick="sendToAI('deepseek')">🐋 DeepSeek</button>
-          <button class="ai-send-btn gemini" onclick="sendToAI('gemini')">✨ Gemini</button>
-          <button class="ai-send-btn grok" onclick="sendToAI('grok')">🔥 Grok</button>
+        <textarea class="output-box" id="outputBox" spellcheck="false" readonly>Prompt yang di-generate akan muncul di sini.</textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-wrap:wrap;gap:6px">
+          <div class="ai-send-row">
+            <button class="aisend chatgpt" onclick="sendToAI('chatgpt')">🧠 ChatGPT</button>
+            <button class="aisend claude" onclick="sendToAI('claude')">📜 Claude</button>
+            <button class="aisend deepseek" onclick="sendToAI('deepseek')">🐋 DeepSeek</button>
+            <button class="aisend gemini" onclick="sendToAI('gemini')">✨ Gemini</button>
+            <button class="aisend grok" onclick="sendToAI('grok')">🔥 Grok</button>
+          </div>
+          <div class="output-meta" id="outputMeta"></div>
         </div>
-        <div class="output-meta" id="outputMeta"></div>
       </div>
     </div>
 
     <div class="bottom-bar">
-      <span class="char-badge" id="charBadge">0 chars</span>
-      <button class="sec-btn" onclick="resetAll()" data-tip="Reset semua field">Reset</button>
-      <button class="sec-btn" onclick="copyActive()" data-tip="Copy prompt aktif">Copy prompt</button>
-      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('chatgpt')" data-tip="Ke ChatGPT">🧠</button>
-      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('claude')" data-tip="Ke Claude">📜</button>
-      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('deepseek')" data-tip="Ke DeepSeek">🐋</button>
-      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('gemini')" data-tip="Ke Gemini">✨</button>
-      <button class="icon-btn" style="font-size:13px;width:auto;padding:0 8px;" onclick="sendToAI('grok')" data-tip="Ke Grok">🔥</button>
-      <button class="gen-btn" id="genBtn" onclick="generatePrompt()" data-tip="Generate prompt dari semua input">⚡ Generate</button>
+      <div class="char-badge" id="charBadge">0 chars · ~0 tokens</div>
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <button class="sbtn" onclick="resetAll()">Reset</button>
+        <button class="sbtn" onclick="copyActive()">Copy prompt</button>
+        <button class="ibtn" onclick="sendToAI('chatgpt')" title="Ke ChatGPT">🧠</button>
+        <button class="ibtn" onclick="sendToAI('claude')" title="Ke Claude">📜</button>
+        <button class="ibtn" onclick="sendToAI('gemini')" title="Ke Gemini">✨</button>
+        <button class="genbtn" id="genBtn" onclick="generatePrompt()">⚡ Generate</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════ TEMPLATES ═══════════════
+// ════════════════════════════════════════
+// TEMPLATES
+// ════════════════════════════════════════
 const TEMPLATES = [
-  { icon:'💻', name:'App / Software', desc:'Bangun aplikasi dari scratch', cat:'dev',
+  { icon:'💻', name:'App / Software', desc:'Bangun dari scratch', cat:'dev',
     sys:'Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun membangun aplikasi production-grade.',
     user:'Bantu saya membuat {{deskripsi_app}}.\n\nTech stack: {{stack}}\nTarget pengguna: {{target_user}}\nScope: {{scope}}',
-    ctx:'', cons:'Berikan: breakdown fitur, arsitektur, struktur folder, langkah implementasi bertahap. Sertakan contoh kode nyata. JANGAN menjelaskan bahwa kamu AI — langsung eksekusi.',
+    ctx:'', cons:'Berikan: breakdown fitur, arsitektur, struktur folder, langkah implementasi bertahap. Sertakan contoh kode nyata. Langsung eksekusi.',
     format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
     vars:[{k:'deskripsi_app',v:'aplikasi to-do list'},{k:'stack',v:'React + Node.js'},{k:'target_user',v:'umum'},{k:'scope',v:'MVP'}] },
   { icon:'🐛', name:'Debug & Review', desc:'Diagnosa bug & code review', cat:'dev',
-    sys:'Kamu adalah expert debugger dan code reviewer. Analisis error secara sistematis, cari root cause bukan symptom. Berikan fix yang benar-benar bekerja. Jangan bertele-tele.',
-    user:'Error yang saya hadapi:\n```\n{{error_message}}\n```\n\nKode bermasalah:\n```{{bahasa}}\n{{kode}}\n```\n\nEkspektasi: {{ekspektasi}}',
+    sys:'Kamu adalah expert debugger dan code reviewer. Analisis error secara sistematis, cari root cause bukan symptom.',
+    user:'Error:\n```\n{{error_message}}\n```\n\nKode:\n```{{bahasa}}\n{{kode}}\n```\n\nEkspektasi: {{ekspektasi}}',
     ctx:'Environment: {{environment}}', cons:'Jelaskan KENAPA error terjadi. Berikan fix exact. Sebutkan edge case.',
     format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
     vars:[{k:'error_message',v:''},{k:'bahasa',v:'javascript'},{k:'kode',v:''},{k:'ekspektasi',v:''},{k:'environment',v:'Node.js 20'}] },
-  { icon:'🧪', name:'Unit Test Generator', desc:'Generate test dari kode', cat:'dev',
-    sys:'Kamu adalah senior QA engineer spesialis test-driven development. Tulis test yang comprehensive, meaningful, bukan hanya coverage.',
-    user:'Buatkan unit test untuk kode berikut:\n\n```{{bahasa}}\n{{kode}}\n```\n\nFramework test: {{framework}}\nFokus: {{fokus_test}}',
-    ctx:'', cons:'Cover happy path, edge case, error case. Nama test harus deskriptif. Tambahkan komentar untuk test yang non-obvious.',
+  { icon:'🧪', name:'Unit Test Gen', desc:'Generate test dari kode', cat:'dev',
+    sys:'Kamu adalah senior QA engineer spesialis test-driven development.',
+    user:'Buatkan unit test untuk:\n\n```{{bahasa}}\n{{kode}}\n```\n\nFramework: {{framework}}\nFokus: {{fokus_test}}',
+    ctx:'', cons:'Cover happy path, edge case, error case. Nama test harus deskriptif.',
     format:'Kode saja',tone:'Teknikal',reasoning:'Think step by step',
     vars:[{k:'bahasa',v:'javascript'},{k:'kode',v:''},{k:'framework',v:'Jest'},{k:'fokus_test',v:'semua case'}] },
-  { icon:'📚', name:'Tech Documentation', desc:'Dokumentasi teknis & README', cat:'dev',
-    sys:'Kamu adalah technical writer di perusahaan teknologi top. Tulis dokumentasi yang akurat, jelas, dan developer-friendly.',
+  { icon:'📚', name:'Tech Docs', desc:'README & dokumentasi teknis', cat:'dev',
+    sys:'Kamu adalah technical writer di perusahaan teknologi top.',
     user:'Tulis {{jenis_doc}} untuk: {{subjek}}\n\nAudience: {{audience}}\nLevel teknis: {{level}}',
-    ctx:'{{konteks_tambahan}}', cons:'Gunakan active voice. Sertakan contoh kode. Struktur dengan heading. Hindari jargon tidak perlu.',
+    ctx:'{{konteks_tambahan}}', cons:'Gunakan active voice. Sertakan contoh kode. Struktur dengan heading.',
     format:'Markdown',tone:'Teknikal',reasoning:'Standard',
-    vars:[{k:'jenis_doc',v:'README'},{k:'subjek',v:'REST API authentication'},{k:'audience',v:'developer junior'},{k:'level',v:'intermediate'},{k:'konteks_tambahan',v:''}] },
-  { icon:'🔍', name:'SEO Content', desc:'Konten yang ramah search engine', cat:'dev',
-    sys:'Kamu adalah SEO specialist dan content strategist. Tulis konten yang dioptimasi untuk search engine tanpa mengorbankan kualitas untuk pembaca manusia.',
-    user:'Tulis konten SEO tentang: {{topik}}\n\nKeyword utama: {{keyword}}\nKeyword sekunder: {{keyword_sekunder}}\nPanjang: {{panjang}}',
-    ctx:'Kompetitor: {{kompetitor}}', cons:'Keyword density natural (1-2%). Sertakan meta description. H1/H2/H3 yang logis. Internal link placeholder [LINK].',
-    format:'Markdown',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'topik',v:''},{k:'keyword',v:''},{k:'keyword_sekunder',v:''},{k:'panjang',v:'1000 kata'},{k:'kompetitor',v:''}] },
-  // ── KONTEN ──
+    vars:[{k:'jenis_doc',v:'README'},{k:'subjek',v:'REST API'},{k:'audience',v:'developer junior'},{k:'level',v:'intermediate'},{k:'konteks_tambahan',v:''}] },
   { icon:'📝', name:'Artikel / Blog', desc:'Konten tulisan berkualitas', cat:'konten',
-    sys:'Kamu adalah content writer dan journalist profesional dengan kemampuan riset mendalam dan gaya menulis yang engaging.',
+    sys:'Kamu adalah content writer dan journalist profesional dengan kemampuan riset mendalam.',
     user:'Tulis artikel tentang {{topik}}.\n\nTarget pembaca: {{pembaca}}\nSudut pandang: {{angle}}\nPanjang: {{panjang}}',
-    ctx:'', cons:'Gunakan active voice. Sertakan data atau contoh konkret di setiap poin. Opening hook kuat. Hindari basa-basi di awal.',
+    ctx:'', cons:'Active voice. Data atau contoh konkret di setiap poin. Hook kuat di awal.',
     format:'Markdown',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'topik',v:'kecerdasan buatan'},{k:'pembaca',v:'pemula'},{k:'angle',v:'dampak di kehidupan sehari-hari'},{k:'panjang',v:'700 kata'}] },
-  { icon:'📱', name:'Caption Sosmed', desc:'Caption IG, TikTok, LinkedIn', cat:'konten',
-    sys:'Kamu adalah social media strategist dan copywriter yang paham algoritma dan psikologi engagement di berbagai platform.',
-    user:'Buat caption untuk {{platform}} tentang {{topik}}.\n\nTone: {{tone_caption}}\nCTA: {{cta}}\nHashtag: {{hashtag}}',
-    ctx:'Brand voice: {{brand_voice}}', cons:'Hook di kalimat pertama. Emoji strategis. Buat 3 variasi dengan pendekatan berbeda.',
+    vars:[{k:'topik',v:'kecerdasan buatan'},{k:'pembaca',v:'pemula'},{k:'angle',v:'dampak kehidupan sehari-hari'},{k:'panjang',v:'700 kata'}] },
+  { icon:'📱', name:'Caption Sosmed', desc:'IG, TikTok, LinkedIn', cat:'konten',
+    sys:'Kamu adalah social media strategist yang paham algoritma engagement.',
+    user:'Buat caption {{platform}} tentang {{topik}}.\nTone: {{tone_caption}}\nCTA: {{cta}}\nHashtag: {{hashtag}}',
+    ctx:'Brand voice: {{brand_voice}}', cons:'Hook di kalimat pertama. Buat 3 variasi dengan pendekatan berbeda.',
     format:'Plain text',tone:'Santai',reasoning:'Standard',
-    vars:[{k:'platform',v:'Instagram'},{k:'topik',v:''},{k:'tone_caption',v:'inspiratif'},{k:'cta',v:'comment di bawah'},{k:'hashtag',v:'ya'},{k:'brand_voice',v:'friendly dan relatable'}] },
+    vars:[{k:'platform',v:'Instagram'},{k:'topik',v:''},{k:'tone_caption',v:'inspiratif'},{k:'cta',v:'comment di bawah'},{k:'hashtag',v:'ya'},{k:'brand_voice',v:'friendly'}] },
   { icon:'📧', name:'Email Profesional', desc:'Email bisnis yang efektif', cat:'konten',
-    sys:'Kamu adalah komunikator profesional dengan keahlian menulis email bisnis yang persuasif, jelas, dan mendapat respons.',
-    user:'Tulis email {{jenis_email}} kepada {{penerima}}.\n\nTujuan: {{tujuan}}\nTone: {{tone_email}}\nHal penting: {{poin_utama}}',
-    ctx:'Konteks hubungan: {{konteks_hubungan}}', cons:'Subject line menarik. Langsung ke poin dalam 2-3 kalimat pertama. Clear CTA di akhir. Maksimal 200 kata.',
+    sys:'Kamu adalah komunikator profesional expert menulis email bisnis persuasif.',
+    user:'Tulis email {{jenis_email}} kepada {{penerima}}.\nTujuan: {{tujuan}}\nPoin utama: {{poin_utama}}',
+    ctx:'Hubungan: {{konteks_hubungan}}', cons:'Subject line menarik. Langsung ke poin. Clear CTA. Maks 200 kata.',
     format:'Plain text',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'jenis_email',v:'follow-up'},{k:'penerima',v:'klien'},{k:'tujuan',v:''},{k:'tone_email',v:'profesional tapi ramah'},{k:'poin_utama',v:''},{k:'konteks_hubungan',v:''}] },
-  { icon:'🤝', name:'Cold Outreach / Sales', desc:'Pesan pertama yang convert', cat:'konten',
-    sys:'Kamu adalah sales copywriter expert yang paham buyer psychology. Tulis pesan cold outreach yang terasa personal, bukan spam.',
-    user:'Tulis cold outreach untuk {{channel}} kepada {{target_prospek}}.\n\nProduk/layanan: {{produk}}\nValue proposition: {{value_prop}}\nPain point yang diselesaikan: {{pain_point}}',
-    ctx:'', cons:'Jangan langsung jualan di kalimat pertama. Personalisasi wajib. Satu CTA jelas. Maksimal 100 kata untuk pesan pertama.',
-    format:'Plain text',tone:'Santai',reasoning:'Standard',
-    vars:[{k:'channel',v:'LinkedIn'},{k:'target_prospek',v:'startup founder'},{k:'produk',v:''},{k:'value_prop',v:''},{k:'pain_point',v:''}] },
-  { icon:'📖', name:'Cerita Pendek / Fiksi', desc:'Prosa kreatif dan storytelling', cat:'konten',
-    sys:'Kamu adalah penulis fiksi berpengalaman dengan kemampuan membangun dunia, karakter yang believable, dan narasi yang menarik.',
-    user:'Tulis cerita pendek bergenre {{genre}} tentang {{premis}}.\n\nSetting: {{setting}}\nProtagonist: {{karakter_utama}}\nKonflik utama: {{konflik}}\nPanjang: {{panjang}}',
-    ctx:'', cons:'Show, dont tell. Dialogue yang natural. Opening yang langsung menarik. Ending yang berkesan, tidak harus happy ending.',
-    format:'Plain text',tone:'Detail',reasoning:'Standard',
-    vars:[{k:'genre',v:'drama realistis'},{k:'premis',v:''},{k:'setting',v:''},{k:'karakter_utama',v:''},{k:'konflik',v:''},{k:'panjang',v:'500 kata'}] },
-  { icon:'🎬', name:'Video / Script', desc:'Naskah konten video', cat:'konten',
-    sys:'Kamu adalah video content creator dan scriptwriter berpengalaman yang paham psikologi penonton dan algoritma platform.',
-    user:'Buat script video {{style}} tentang {{topik}} untuk {{platform}}.\n\nDurasi: {{durasi}}',
-    ctx:'', cons:'Hook kuat di 5 detik pertama. Sertakan visual cues / b-roll notes. Closing + CTA yang natural. Tulis seperti orang berbicara, bukan membaca.',
+    vars:[{k:'jenis_email',v:'follow-up'},{k:'penerima',v:'klien'},{k:'tujuan',v:''},{k:'poin_utama',v:''},{k:'konteks_hubungan',v:''}] },
+  { icon:'🎬', name:'Script Video', desc:'Naskah konten video', cat:'konten',
+    sys:'Kamu adalah video content creator dan scriptwriter berpengalaman.',
+    user:'Buat script {{style}} tentang {{topik}} untuk {{platform}}.\nDurasi: {{durasi}}',
+    ctx:'', cons:'Hook kuat di 5 detik pertama. Visual cues / b-roll notes. Closing + CTA natural.',
     format:'Plain text',tone:'Santai',reasoning:'Standard',
     vars:[{k:'style',v:'edukatif'},{k:'topik',v:'tips produktivitas'},{k:'platform',v:'YouTube'},{k:'durasi',v:'5-10 menit'}] },
-  // ── MUSIK ──
-  { icon:'🎵', name:'Lirik Lagu', desc:'Langsung tulis lirik, bukan cerita', cat:'musik',
-    sys:'Kamu adalah songwriter profesional. Ahli dalam struktur lagu, imagery lirik, dan emosi musikal. PENTING: Langsung tulis liriknya — jangan cerita tentang lagu, jangan penjelasan. Mulai langsung dari Verse 1.',
-    user:'Langsung tulis lirik lagu {{genre}} tentang {{tema}}.\n\nMood: {{mood}}\nBahasa: {{bahasa}}\nPesan/cerita: {{pesan}}\n\nStruktur yang diinginkan: Verse 1 → Pre-Chorus → Chorus → Verse 2 → Bridge → Outro\n\nMULAI SEKARANG DARI VERSE 1:',
-    ctx:'', cons:'DILARANG menulis narasi atau penjelasan sebelum lirik. Langsung mulai dengan [Verse 1]. Imagery kuat, bukan klise. Hook chorus mudah diingat dan diulang.',
+  { icon:'🎵', name:'Lirik Lagu', desc:'Langsung tulis lirik', cat:'musik',
+    sys:'Kamu adalah songwriter profesional. PENTING: Langsung tulis liriknya — mulai dari [Verse 1]. Jangan cerita tentang lagu.',
+    user:'Langsung tulis lirik lagu {{genre}} tentang {{tema}}.\nMood: {{mood}}\nBahasa: {{bahasa}}\nPesan: {{pesan}}\n\nMULAI DARI [Verse 1]:',
+    ctx:'', cons:'DILARANG narasi sebelum lirik. Imagery kuat. Hook chorus mudah diingat.',
     format:'Plain text',tone:'Detail',reasoning:'Standard',
     vars:[{k:'genre',v:'pop'},{k:'tema',v:'perpisahan'},{k:'mood',v:'melankolis'},{k:'bahasa',v:'Indonesia'},{k:'pesan',v:''}] },
   { icon:'🎼', name:'Struktur Lagu', desc:'Konsep & arsitektur musikal', cat:'musik',
-    sys:'Kamu adalah music producer dan arranger profesional. Bantu merancang struktur lagu yang kuat secara musikal.',
-    user:'Rancang struktur lagu {{genre}} tentang {{tema}}.\n\nMood: {{mood}}\nDurasi target: {{durasi}}\nInstrumentasi: {{instrumen}}',
-    ctx:'', cons:'Berikan: peta struktur (bagian + durasi), panduan melodi per section, key/tempo rekomendasi, chord progression dasar, production notes.',
+    sys:'Kamu adalah music producer dan arranger profesional.',
+    user:'Rancang struktur lagu {{genre}} tentang {{tema}}.\nMood: {{mood}}\nDurasi: {{durasi}}\nInstrumentasi: {{instrumen}}',
+    ctx:'', cons:'Peta struktur + durasi, panduan melodi, key/tempo, chord progression, production notes.',
     format:'Markdown',tone:'Teknikal',reasoning:'Standard',
     vars:[{k:'genre',v:'pop'},{k:'tema',v:''},{k:'mood',v:''},{k:'durasi',v:'3-4 menit'},{k:'instrumen',v:'gitar akustik + vokal'}] },
-  { icon:'🎙️', name:'Podcast Script', desc:'Naskah podcast yang engaging', cat:'musik',
-    sys:'Kamu adalah podcast producer dan scriptwriter. Tulis script yang terasa natural diucapkan, bukan dibaca.',
-    user:'Tulis script podcast untuk episode tentang {{topik}}.\n\nFormat: {{format_podcast}}\nDurasi: {{durasi}}\nHost: {{nama_host}}\nAudience: {{audience}}',
-    ctx:'', cons:'Gunakan bahasa conversational. Sertakan [PAUSE], [SFX], [MUSIC] cue. Opening hook kuat. Pertanyaan rhetorikal untuk engagement. Outro + CTA.',
-    format:'Plain text',tone:'Santai',reasoning:'Standard',
-    vars:[{k:'topik',v:''},{k:'format_podcast',v:'solo monologue'},{k:'durasi',v:'15-20 menit'},{k:'nama_host',v:''},{k:'audience',v:'umum'}] },
-  // ── BISNIS ──
-  { icon:'📊', name:'Pitch Deck / Presentasi', desc:'Slide yang menjual ide', cat:'bisnis',
-    sys:'Kamu adalah startup advisor dan presentation coach. Bantu membangun narasi presentasi yang persuasif dan memorable.',
-    user:'Buat outline pitch deck untuk {{jenis_presentasi}} tentang {{subjek}}.\n\nAudience: {{audience_presentasi}}\nDurasi: {{durasi_presentasi}}\nTujuan: {{tujuan_presentasi}}',
-    ctx:'', cons:'Sertakan: jumlah slide, judul setiap slide, poin utama, data yang dibutuhkan, visual yang direkomendasikan. Narrative arc yang jelas.',
+  { icon:'📊', name:'Pitch Deck', desc:'Slide yang menjual ide', cat:'bisnis',
+    sys:'Kamu adalah startup advisor dan presentation coach.',
+    user:'Buat outline pitch deck untuk {{jenis_presentasi}} tentang {{subjek}}.\nAudience: {{audience}}\nDurasi: {{durasi}}\nTujuan: {{tujuan}}',
+    ctx:'', cons:'Jumlah slide, judul, poin utama, data dibutuhkan, visual rekomendasi. Narrative arc jelas.',
     format:'Markdown',tone:'Professional',reasoning:'Think step by step',
-    vars:[{k:'jenis_presentasi',v:'investor pitch'},{k:'subjek',v:''},{k:'audience_presentasi',v:'investor'},{k:'durasi_presentasi',v:'10 menit'},{k:'tujuan_presentasi',v:'seed funding'}] },
+    vars:[{k:'jenis_presentasi',v:'investor pitch'},{k:'subjek',v:''},{k:'audience',v:'investor'},{k:'durasi',v:'10 menit'},{k:'tujuan',v:'seed funding'}] },
   { icon:'💼', name:'Proposal Bisnis', desc:'Proposal yang memenangkan klien', cat:'bisnis',
-    sys:'Kamu adalah business development expert dengan track record memenangkan proposal. Tulis proposal yang konkret, bukan template.',
-    user:'Tulis proposal bisnis untuk {{jenis_proposal}}.\n\nKlien: {{nama_klien}}\nLayanan/produk: {{layanan}}\nNilai deal: {{nilai}}\nDeadline: {{deadline}}',
-    ctx:'Pain point klien: {{pain_point_klien}}', cons:'Executive summary dahulu. Problem → Solution → Benefit → Timeline → Investment → CTA. Tone confident, bukan desperate.',
+    sys:'Kamu adalah business development expert. Tulis proposal yang konkret, bukan template.',
+    user:'Tulis proposal untuk {{jenis_proposal}}.\nKlien: {{nama_klien}}\nLayanan: {{layanan}}\nNilai: {{nilai}}\nDeadline: {{deadline}}',
+    ctx:'Pain point: {{pain_point_klien}}', cons:'Problem → Solution → Benefit → Timeline → Investment → CTA.',
     format:'Markdown',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'jenis_proposal',v:'jasa pembuatan website'},{k:'nama_klien',v:''},{k:'layanan',v:''},{k:'nilai',v:''},{k:'deadline',v:''},{k:'pain_point_klien',v:''}] },
-  { icon:'📋', name:'SOP / Dokumentasi', desc:'Prosedur operasional standar', cat:'bisnis',
-    sys:'Kamu adalah business process consultant. Tulis SOP yang jelas, tidak ambigu, dan bisa diikuti oleh siapapun tanpa training khusus.',
-    user:'Buat SOP untuk proses: {{nama_proses}}\n\nDepartemen: {{departemen}}\nPenanggung jawab: {{pic}}\nFrekuensi: {{frekuensi}}',
-    ctx:'Tools yang digunakan: {{tools}}', cons:'Numbered steps yang jelas. Sertakan: tujuan, scope, definisi, langkah detail, checklist, troubleshooting umum.',
-    format:'Markdown',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'nama_proses',v:'onboarding karyawan baru'},{k:'departemen',v:'HR'},{k:'pic',v:'HR Manager'},{k:'frekuensi',v:'setiap ada karyawan baru'},{k:'tools',v:''}] },
-  { icon:'🧠', name:'Brainstorming', desc:'Generate ide dan solusi kreatif', cat:'bisnis',
-    sys:'Kamu adalah creative strategist dan innovation facilitator. Generate ide yang diverse — dari yang konvensional hingga yang out-of-the-box. Jangan sensor ide gila.',
-    user:'Brainstorm ide untuk: {{tantangan}}\n\nKonteks: {{konteks}}\nBatasan: {{batasan}}\nJumlah ide yang diinginkan: {{jumlah}}',
-    ctx:'', cons:'Kategorikan ide (quick win / mid-term / moonshot). Untuk setiap ide: nama, deskripsi singkat, pro, con, effort/impact estimate.',
+    vars:[{k:'jenis_proposal',v:'jasa website'},{k:'nama_klien',v:''},{k:'layanan',v:''},{k:'nilai',v:''},{k:'deadline',v:''},{k:'pain_point_klien',v:''}] },
+  { icon:'🧠', name:'Brainstorming', desc:'Generate ide kreatif', cat:'bisnis',
+    sys:'Kamu adalah creative strategist. Generate ide yang diverse dari konvensional hingga out-of-the-box.',
+    user:'Brainstorm ide untuk: {{tantangan}}\nKonteks: {{konteks}}\nBatasan: {{batasan}}\nJumlah: {{jumlah}}',
+    ctx:'', cons:'Kategorikan: quick win / mid-term / moonshot. Setiap ide: nama, deskripsi, pro, con, effort/impact.',
     format:'Markdown',tone:'Santai',reasoning:'Chain of thought',
     vars:[{k:'tantangan',v:''},{k:'konteks',v:''},{k:'batasan',v:''},{k:'jumlah',v:'20'}] },
-  { icon:'⚖️', name:'Negosiasi & Persuasi', desc:'Strategi negosiasi & skrip', cat:'bisnis',
-    sys:'Kamu adalah mantan negosiator FBI dan konsultan negosiasi korporat. Kuasai tactical empathy, calibrated questions, dan value framing.',
-    user:'Saya akan bernegosiasi tentang: {{konteks_negosiasi}}\n\nPihak lawan: {{pihak_lawan}}\nTujuan saya: {{tujuan_negosiasi}}\nBATNA (alternatif terbaik): {{batna}}\nPower dynamic: {{power_dynamic}}',
-    ctx:'', cons:'Berikan: 1) Persiapan sebelum negosiasi (data, riset), 2) Strategi pembukaan, 3) 5 kalibrasi pertanyaan untuk mengumpulkan informasi, 4) Beberapa skenario respon berdasarkan kemungkinan reaksi lawan, 5) Closing strategy. JANGAN jelaskan ulang siapa kamu.',
-    format:'Markdown',tone:'Profesional',reasoning:'Think step by step',
-    vars:[{k:'konteks_negosiasi',v:'kenaikan gaji'},{k:'pihak_lawan',v:'manajer HR'},{k:'tujuan_negosiasi',v:'naik 30%'},{k:'batna',v:'ada tawaran dari perusahaan lain'},{k:'power_dynamic',v:'saya punya leverage karena tim sangat bergantung pada saya'}] },
-  { icon:'📈', name:'Growth Hacking', desc:'Strategi pertumbuhan startup', cat:'bisnis',
-    sys:'Kamu adalah growth hacker yang pernah membantu dua unicorn mencapai 100M user. Paham ICE framework, viral loops, dan retention mechanics.',
-    user:'Produk: {{produk_growth}}\n\nTarget user: {{target_user_growth}}\nFase saat ini: {{fase_startup}}\nMetrik yang ingin ditingkatkan: {{metrik}}\nBudget: {{budget_growth}}',
-    ctx:'', cons:'Gunakan framework ICE (Impact, Confidence, Ease). Berikan 10 ide eksperimen terukur. Untuk setiap ide: skor ICE 1-10, hipotesis, langkah implementasi, metrik sukses, potensi kendala. Prioritaskan yang LOW EFFORT HIGH IMPACT.',
-    format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
-    vars:[{k:'produk_growth',v:'aplikasi belajar bahasa'},{k:'target_user_growth',v:'mahasiswa 18-24'},{k:'fase_startup',v:'pre-seed / baru launch'},{k:'metrik',v:'Daily Active Users'},{k:'budget_growth',v:'Rp 5 juta/bulan'}] },
-  // ── EDUKASI ──
-  { icon:'🎓', name:'Materi Pembelajaran', desc:'Modul edukasi yang efektif', cat:'edukasi',
-    sys:'Kamu adalah instructional designer dan educator berpengalaman. Rancang materi yang mengikuti prinsip pedagogi modern: simple → complex, concrete → abstract.',
-    user:'Buat materi pembelajaran tentang {{topik}} untuk {{level_peserta}}.\n\nDurasi belajar: {{durasi_belajar}}\nFormat: {{format_materi}}\nLearning objective: {{objective}}',
-    ctx:'', cons:'Sertakan: tujuan pembelajaran, prasyarat, konten bertahap, contoh & latihan, kuis atau assessment, referensi lanjutan.',
-    format:'Markdown',tone:'Detail',reasoning:'Think step by step',
-    vars:[{k:'topik',v:'dasar-dasar Python'},{k:'level_peserta',v:'pemula total'},{k:'durasi_belajar',v:'2 jam'},{k:'format_materi',v:'modul teks'},{k:'objective',v:'bisa menulis program sederhana'}] },
-  { icon:'🔬', name:'Riset & Analisis', desc:'Analisis mendalam suatu topik', cat:'edukasi',
-    sys:'Kamu adalah research analyst dengan kemampuan mensintesis informasi kompleks menjadi insight yang actionable.',
-    user:'Lakukan analisis mendalam tentang: {{topik_riset}}\n\nAngle: {{angle_riset}}\nKedalaman: {{kedalaman}}\nOutput yang dibutuhkan: {{output_riset}}',
-    ctx:'', cons:'Sertakan: executive summary, temuan utama, data pendukung, counter-argument, kesimpulan, rekomendasi. Akui keterbatasan analisis.',
-    format:'Markdown',tone:'Professional',reasoning:'Chain of thought',
-    vars:[{k:'topik_riset',v:''},{k:'angle_riset',v:'dampak dan tren'},{k:'kedalaman',v:'komprehensif'},{k:'output_riset',v:'laporan eksekutif'}] },
-  { icon:'📝', name:'Essay Akademik', desc:'Esai ilmiah & argumentatif', cat:'edukasi',
-    sys:'Kamu adalah academic writer dan researcher. Tulis esai yang argumentatif, well-structured, dan didukung bukti.',
-    user:'Tulis essay akademik tentang: {{topik_essay}}\n\nArgumen utama (thesis): {{thesis}}\nPanjang: {{panjang_essay}}\nGaya sitasi: {{sitasi}}',
-    ctx:'', cons:'Struktur: Introduction → Body (3+ paragraf) → Conclusion. Setiap klaim didukung evidence. Thesis statement jelas di intro. Counter-argument diakui.',
+  { icon:'⚖️', name:'Negosiasi', desc:'Strategi & skrip negosiasi', cat:'bisnis',
+    sys:'Kamu adalah mantan negosiator FBI dan konsultan negosiasi korporat. Kuasai tactical empathy dan calibrated questions.',
+    user:'Negosiasi tentang: {{konteks}}\nPihak lawan: {{lawan}}\nTujuan: {{tujuan}}\nBATNA: {{batna}}\nPower: {{power}}',
+    ctx:'', cons:'Persiapan, pembukaan, 5 calibrated questions, skenario respons, closing strategy.',
     format:'Markdown',tone:'Professional',reasoning:'Think step by step',
-    vars:[{k:'topik_essay',v:''},{k:'thesis',v:''},{k:'panjang_essay',v:'1500 kata'},{k:'sitasi',v:'APA'}] },
-  { icon:'🎮', name:'Game Design (GDD)', desc:'Game Design Document', cat:'edukasi',
-    sys:'Kamu adalah senior game designer yang telah merilis game di Steam, mobile, dan konsol. Paham MDA framework, monetisasi, dan retention loop.',
-    user:'Bantu saya mendesain game: {{konsep_game}}\n\nGenre: {{genre_game}}\nPlatform: {{platform_game}}\nTarget audiens: {{audiens_game}}\nModel monetisasi: {{monetisasi_game}}',
-    ctx:'', cons:'Buat GDD singkat: 1) Elevator pitch (1 kalimat), 2) Core gameplay loop, 3) Unique selling point, 4) Pemain target, 5) Mekanik utama dan fitur, 6) Progression & reward system, 7) Monetisasi, 8) Minimal 5 risiko desain dan mitigasi. Langsung eksekusi!',
-    format:'Markdown',tone:'Teknikal',reasoning:'Think step by step',
-    vars:[{k:'konsep_game',v:'survival horror di hutan Indonesia'},{k:'genre_game',v:'Survival Horror'},{k:'platform_game',v:'PC & Mobile'},{k:'audiens_game',v:'dewasa muda 18-30'},{k:'monetisasi_game',v:'premium + DLC kosmetik'}] },
-  { icon:'🧘', name:'Coaching & Terapi', desc:'Sesi coaching / konseling', cat:'edukasi',
-    sys:'Kamu adalah psikolog klinis dan executive coach dengan 20 tahun pengalaman. Gunakan teknik CBT, active listening, dan pertanyaan reflektif. JANGAN mendiagnosa — fasilitasi eksplorasi diri.',
-    user:'Topik sesi: {{topik_sesi}}\n\nKlien menghadapi: {{masalah_klien}}\nEmosi dominan: {{emosi_dominan}}\nApa yang sudah dicoba: {{yang_sudah_dictoba}}\nTujuan sesi ini: {{tujuan_sesi}}',
-    ctx:'', cons:'Struktur sesi 45 menit: 1) Check-in & validasi emosi (5 mnt), 2) Eksplorasi akar masalah dengan 3-5 pertanyaan powerful (15 mnt), 3) Reframing & perspektif baru (10 mnt), 4) Action plan kecil yang konkret (10 mnt), 5) Check-out & komitmen (5 mnt). Tulis seolah-olah transkrip sesi, lengkap dengan kemungkinan respons klien.',
-    format:'Plain text',tone:'Empati',reasoning:'Think step by step',
-    vars:[{k:'topik_sesi',v:'quarter life crisis'},{k:'masalah_klien',v:'merasa stuck di karir'},{k:'emosi_dominan',v:'cemas dan bingung'},{k:'yang_sudah_dictoba',v:'apply job sana-sini tapi tidak ada panggilan'},{k:'tujuan_sesi',v:'mendapatkan kejelasan arah karir 6 bulan ke depan'}] },
-  // ── MISC ──
-  { icon:'✨', name:'Blank Canvas', desc:'Mulai dari nol bebas', cat:'misc',
-    sys:'',user:'',ctx:'',cons:'',
-    format:'Plain text',tone:'Professional',reasoning:'Standard',vars:[] },
+    vars:[{k:'konteks',v:'kenaikan gaji'},{k:'lawan',v:'HR manager'},{k:'tujuan',v:'naik 30%'},{k:'batna',v:'tawaran lain'},{k:'power',v:'tim bergantung pada saya'}] },
+  { icon:'🎓', name:'Materi Belajar', desc:'Modul edukasi efektif', cat:'edukasi',
+    sys:'Kamu adalah instructional designer. Rancang materi simple→complex, concrete→abstract.',
+    user:'Buat materi pembelajaran tentang {{topik}} untuk {{level}}.\nDurasi: {{durasi}}\nFormat: {{format}}\nObjective: {{objective}}',
+    ctx:'', cons:'Tujuan, prasyarat, konten bertahap, latihan, kuis, referensi.',
+    format:'Markdown',tone:'Detail',reasoning:'Think step by step',
+    vars:[{k:'topik',v:'dasar Python'},{k:'level',v:'pemula'},{k:'durasi',v:'2 jam'},{k:'format',v:'modul teks'},{k:'objective',v:'bisa menulis program sederhana'}] },
+  { icon:'🔬', name:'Riset & Analisis', desc:'Analisis mendalam suatu topik', cat:'edukasi',
+    sys:'Kamu adalah research analyst yang mensintesis informasi kompleks menjadi insight actionable.',
+    user:'Analisis mendalam tentang: {{topik}}\nAngle: {{angle}}\nKedalaman: {{kedalaman}}\nOutput: {{output}}',
+    ctx:'', cons:'Executive summary, temuan utama, data pendukung, counter-argument, rekomendasi.',
+    format:'Markdown',tone:'Professional',reasoning:'Chain of thought',
+    vars:[{k:'topik',v:''},{k:'angle',v:'dampak dan tren'},{k:'kedalaman',v:'komprehensif'},{k:'output',v:'laporan eksekutif'}] },
   { icon:'📄', name:'Resume / CV', desc:'CV ATS-friendly & impactful', cat:'misc',
-    sys:'Kamu adalah top-tier HR recruiter dan career coach. Tulis resume/CV yang melewati filter ATS, menarik perhatian rekruter dalam 7 detik pertama.',
-    user:'Bantu saya tulis resume untuk posisi: {{posisi_dilamar}}\n\nIndustri: {{industri}}\nRingkasan pengalaman: {{ringkasan_pengalaman}}\nSkill utama: {{skill_utama}}',
-    ctx:'', cons:'Format: 1) Professional summary (3 kalimat impactful), 2) Skills (hard + soft), 3) Pengalaman kerja dengan format STAR (Situation, Task, Action, Result) dan METRIK kuantitatif, 4) Pendidikan, 5) Pencapaian tambahan. JANGAN gunakan kalimat generik seperti "pekerja keras".',
+    sys:'Kamu adalah HR recruiter dan career coach top. Tulis resume yang lewati ATS.',
+    user:'Bantu tulis resume untuk: {{posisi}}\nIndustri: {{industri}}\nPengalaman: {{pengalaman}}\nSkill: {{skill}}',
+    ctx:'', cons:'Summary 3 kalimat impactful. STAR format dengan metrik kuantitatif. JANGAN kalimat generik.',
     format:'Markdown',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'posisi_dilamar',v:'Product Manager'},{k:'industri',v:'fintech'},{k:'ringkasan_pengalaman',v:'3 tahun sebagai associate product manager di startup'},{k:'skill_utama',v:'data analysis, user research, roadmap planning'}] },
-  { icon:'💌', name:'Cover Letter', desc:'Surat lamaran yang standout', cat:'misc',
-    sys:'Kamu adalah career strategist yang telah membantu ratusan orang mendapatkan pekerjaan impian.',
-    user:'Tulis cover letter untuk posisi {{posisi_cover}} di {{perusahaan}}.\n\nAlasan saya tertarik: {{alasan_tertarik}}\n\nPengalaman relevan: {{pengalaman_relevan}}',
-    ctx:'', cons:'Hook kuat di paragraf pertama yang menunjukkan riset tentang perusahaan. Hubungkan pengalaman dengan kebutuhan spesifik perusahaan. Akhiri dengan confidence, bukan desperate. Maks 250 kata.',
-    format:'Plain text',tone:'Professional',reasoning:'Standard',
-    vars:[{k:'posisi_cover',v:'UI/UX Designer'},{k:'perusahaan',v:'Gojek'},{k:'alasan_tertarik',v:'misi perusahaan untuk memudahkan hidup masyarakat'},{k:'pengalaman_relevan',v:'mendesain ulang aplikasi mobile yang meningkatkan retensi 20%'}] },
+    vars:[{k:'posisi',v:'Product Manager'},{k:'industri',v:'fintech'},{k:'pengalaman',v:''},{k:'skill',v:''}] },
+  { icon:'✨', name:'Blank Canvas', desc:'Mulai dari nol', cat:'misc',
+    sys:'',user:'',ctx:'',cons:'',format:'Plain text',tone:'Professional',reasoning:'Standard',vars:[] },
 ];
 
-// ═══════════════ BLOCKS ═══════════════
 const BLOCKS = [
-  {label:'Role',color:'#4db89a',text:'Kamu adalah {{role}} dengan keahlian di {{domain}}. '},
+  {label:'Role',color:'#3db88a',text:'Kamu adalah {{role}} dengan keahlian di {{domain}}. '},
   {label:'Context',color:'#5b9bd5',text:'\n\nKonteks: {{latar_belakang}}'},
   {label:'Task',color:'#d4614a',text:'\n\nTugas kamu: {{deskripsi_tugas}}'},
   {label:'Format',color:'#d4923a',text:'\n\nRespond dalam format {{format}}.'},
   {label:'Example',color:'#8b7dd8',text:'\n\nContoh:\nInput: {{contoh_input}}\nOutput: {{contoh_output}}'},
-  {label:'COT',color:'#6aaa5a',text:'\n\nThink step by step sebelum menjawab.'},
-  {label:'JSON out',color:'#8a8880',text:'\n\nRespond HANYA dengan valid JSON: {"result": ..., "reason": ...}'},
+  {label:'COT',color:'#5aaa4a',text:'\n\nThink step by step sebelum menjawab.'},
+  {label:'JSON',color:'#7a7872',text:'\n\nRespond HANYA dengan valid JSON: {"result":..., "reason":...}'},
   {label:'Batasan',color:'#d4614a',text:'\n\nBatasan ketat: {{batasan_spesifik}}'},
 ];
 
-// ═══════════════ DOMAINS ═══════════════
 const DOMAINS = {
-  app:{ kw:['aplikasi','website','sistem informasi','platform digital','dashboard','software','saas','crud','rest api','backend','frontend','mobile app','landing page','marketplace','toko online','bot telegram','chatbot','game','microservice','monorepo'], pat:[/buat(kan)?\s+(app|web|sistem|platform|tool|dashboard)/,/bangun\s+(app|web|sistem|platform)/,/develop(kan)?/,/coding\s+/,/program\s+untuk/,/fitur\s+(login|register|crud|auth)/], label:'Aplikasi / Software',color:'#5b9bd5',bg:'rgba(91,155,213,.12)',
-    qs:[{id:'stack',q:'Tech stack?',type:'chip',opts:['React','Vue','Next.js','Flutter','React Native','Laravel','Node.js','Python','Bebas']},{id:'user',q:'Target pengguna?',type:'chip',opts:['Developer','End user umum','Tim internal','Admin','Bebas']},{id:'scope',q:'Skala?',type:'chip',opts:['MVP','Produksi penuh','Prototype','PoC']},{id:'detail',q:'Detail tambahan?',type:'text',ph:'Fitur utama, constraint...'}]},
-  lagu:{ kw:['lagu','lirik','lyric','musik','song','chord','melodi','nada','rap','hip hop','nasyid','soundtrack','verse','chorus','bridge','genre pop','genre rock','genre jazz','genre indie','genre rb','genre folk','pop sad','pop ceria','sad song','love song','breakup song','lagu sedih','lagu cinta','lagu galau','lagu bahagia','lagu romantis','lagu jawa','lagu sunda','lagu melayu','lagu religi','lagu anak'], pat:[/buat(kan)?\s+(lagu|lirik|musik|song)/,/tulis(kan)?\s+(lagu|lirik)/,/(lagu|lirik)\s+tentang/,/tentang\s+(mantan|cinta|rindu|patah hati|putus|galau|kehilangan|kerinduan|perasaan)/,/(mantan|patah hati|putus cinta|galau|rindu)\s*(yang|nya|ku|mu)?/,/pop\s+(sad|ceria|galau|jawa|melayu)/,/r&b|rnb/,/verse\s*1|chorus|bridge/,/(sad|cinta|galau|rindu)\s*(song|music)/], label:'Lagu / Musik',color:'#8b7dd8',bg:'rgba(139,125,216,.12)',
-    qs:[{id:'genre',q:'Genre?',type:'chip',opts:['Pop','R&B','Rock','Indie','Jazz','Folk','Hip-hop','Jawa/Daerah','Bebas']},{id:'mood',q:'Mood?',type:'chip',opts:['Sedih','Bahagia','Romantis','Energik','Melankolis','Spiritual','Galau']},{id:'output',q:'Yang dibutuhin?',type:'chip',opts:['Full lirik','Struktur lagu','Chord & lirik','Konsep saja']},{id:'detail',q:'Cerita / pesan utama?',type:'text',ph:'Tentang seseorang yang... / di tempat... / rasa...'}]},
-  video:{ kw:['video youtube','video tiktok','konten video','script video','naskah video','vlog','reels','short video','dokumenter','tutorial video','podcast video'], pat:[/buat(kan)?\s+(video|script|naskah)\s+/,/script\s+(untuk|buat)/,/konten\s+(youtube|tiktok|reels)/], label:'Video / Script',color:'#d4614a',bg:'rgba(212,97,74,.12)',
-    qs:[{id:'platform',q:'Platform?',type:'chip',opts:['YouTube','TikTok','Instagram Reels','Presentasi','Iklan']},{id:'duration',q:'Durasi?',type:'chip',opts:['< 1 menit','1-5 menit','5-15 menit','15+ menit']},{id:'style',q:'Style?',type:'chip',opts:['Edukatif','Hiburan','Storytelling','Tutorial','Motivasi']},{id:'detail',q:'Hook / CTA khusus?',type:'text',ph:''}]},
-  artikel:{ kw:['artikel','blog post','tulisan','konten artikel','essay','review produk','listicle','berita','opini','kolom'], pat:[/tulis(kan)?\s+(artikel|blog|essay|tulisan)/,/buat(kan)?\s+(artikel|blog|konten)/], label:'Artikel / Konten',color:'#4db89a',bg:'rgba(77,184,154,.12)',
-    qs:[{id:'audience',q:'Untuk siapa?',type:'chip',opts:['Pemula','Profesional','Developer','Umum','Pelajar']},{id:'tone',q:'Tone tulisan?',type:'chip',opts:['Santai','Formal','Edukatif','Persuasif','Storytelling']},{id:'length',q:'Panjang?',type:'chip',opts:['Pendek (300-500 kata)','Sedang (700-1000 kata)','Panjang (1500+ kata)']},{id:'detail',q:'Angle / sudut pandang?',type:'text',ph:'Fokus pada...'}]},
-  desain:{ kw:['desain ui','desain ux','ui ux','wireframe','mockup','logo','branding','poster','banner','infografis','figma','adobe xd','design system','color palette','typography'], pat:[/buat(kan)?\s+(desain|design|logo|poster|banner)/,/desain(kan)?\s+/], label:'Desain / UI',color:'#d4923a',bg:'rgba(212,146,58,.12)',
-    qs:[{id:'type',q:'Jenis?',type:'chip',opts:['UI/UX App','Wireframe','Branding','Poster','Infografis']},{id:'style',q:'Gaya visual?',type:'chip',opts:['Minimalis','Modern','Playful','Corporate','Retro']},{id:'tool',q:'Tool?',type:'chip',opts:['Figma','Adobe XD','Canva','Sketch','Bebas']},{id:'detail',q:'Referensi / detail?',type:'text',ph:'Warna brand, inspirasi...'}]},
-  umum:{ kw:[],pat:[],label:'Umum',color:'#8a8880',bg:'rgba(138,136,128,.12)',
-    qs:[{id:'goal',q:'Tujuan?',type:'chip',opts:['Buat dari nol','Improve yang ada','Riset','Jelaskan konsep']},{id:'output',q:'Format output?',type:'chip',opts:['Teks/paragraf','List/poin','Kode','Tabel','Bebas']},{id:'detail',q:'Konteks tambahan?',type:'text',ph:'Semakin detail semakin presisi...'}]},
+  app:{ kw:['aplikasi','website','sistem informasi','platform digital','dashboard','software','saas','crud','rest api','backend','frontend','mobile app','landing page','marketplace','toko online','bot telegram','chatbot','microservice'],
+    pat:[/buat(kan)?\s+(app|web|sistem|platform|tool|dashboard)/,/bangun\s+(app|web|sistem)/,/develop(kan)?/,/coding\s+/,/program\s+untuk/],
+    label:'Aplikasi / Software',color:'#5b9bd5',bg:'rgba(91,155,213,.12)',
+    qs:[{id:'stack',q:'Tech stack?',type:'chip',opts:['React','Vue','Next.js','Flutter','Laravel','Node.js','Python','Bebas']},{id:'user',q:'Target pengguna?',type:'chip',opts:['Developer','End user umum','Tim internal','Admin']},{id:'scope',q:'Skala?',type:'chip',opts:['MVP','Produksi penuh','Prototype','PoC']},{id:'detail',q:'Detail tambahan?',type:'text',ph:'Fitur utama, constraint...'}]},
+  lagu:{ kw:['lagu','lirik','lyric','musik','song','chord','melodi','verse','chorus','bridge','pop','rock','jazz','indie','rb','folk','rap','nasyid','sad song','love song'],
+    pat:[/buat(kan)?\s+(lagu|lirik|musik|song)/,/tulis(kan)?\s+(lagu|lirik)/,/(lagu|lirik)\s+tentang/,/tentang\s+(mantan|cinta|rindu|patah hati|putus|galau)/,/verse|chorus|bridge/],
+    label:'Lagu / Musik',color:'#8b7dd8',bg:'rgba(139,125,216,.12)',
+    qs:[{id:'genre',q:'Genre?',type:'chip',opts:['Pop','R&B','Rock','Indie','Jazz','Folk','Hip-hop','Daerah']},{id:'mood',q:'Mood?',type:'chip',opts:['Sedih','Bahagia','Romantis','Energik','Melankolis','Galau']},{id:'output',q:'Yang dibutuhkan?',type:'chip',opts:['Full lirik','Struktur lagu','Chord & lirik','Konsep saja']},{id:'detail',q:'Cerita / pesan?',type:'text',ph:'Tentang seseorang yang...'}]},
+  video:{ kw:['video youtube','video tiktok','konten video','script video','naskah video','vlog','reels','short video','dokumenter','tutorial video'],
+    pat:[/buat(kan)?\s+(video|script|naskah)\s+/,/script\s+(untuk|buat)/,/konten\s+(youtube|tiktok)/],
+    label:'Video / Script',color:'#d4614a',bg:'rgba(212,97,74,.12)',
+    qs:[{id:'platform',q:'Platform?',type:'chip',opts:['YouTube','TikTok','Instagram Reels','Presentasi','Iklan']},{id:'duration',q:'Durasi?',type:'chip',opts:['< 1 menit','1-5 menit','5-15 menit','15+ menit']},{id:'style',q:'Style?',type:'chip',opts:['Edukatif','Hiburan','Tutorial','Motivasi']},{id:'detail',q:'Hook / CTA?',type:'text',ph:''}]},
+  artikel:{ kw:['artikel','blog post','tulisan','konten artikel','essay','review','listicle','berita','opini'],
+    pat:[/tulis(kan)?\s+(artikel|blog|essay|tulisan)/,/buat(kan)?\s+(artikel|blog|konten)/],
+    label:'Artikel / Konten',color:'#3db88a',bg:'rgba(61,184,138,.12)',
+    qs:[{id:'audience',q:'Untuk siapa?',type:'chip',opts:['Pemula','Profesional','Developer','Umum','Pelajar']},{id:'tone',q:'Tone?',type:'chip',opts:['Santai','Formal','Edukatif','Persuasif','Storytelling']},{id:'length',q:'Panjang?',type:'chip',opts:['Pendek (300-500 kata)','Sedang (700-1000 kata)','Panjang (1500+ kata)']},{id:'detail',q:'Angle?',type:'text',ph:'Fokus pada...'}]},
+  umum:{ kw:[],pat:[],label:'Umum',color:'#7a7872',bg:'rgba(122,120,114,.12)',
+    qs:[{id:'goal',q:'Tujuan?',type:'chip',opts:['Buat dari nol','Improve yang ada','Riset','Jelaskan konsep']},{id:'output',q:'Format output?',type:'chip',opts:['Teks','List/poin','Kode','Tabel','Bebas']},{id:'detail',q:'Konteks tambahan?',type:'text',ph:'Semakin detail semakin presisi...'}]},
 };
 
-// ═══════════════ STATE ═══════════════
-let vars=[], answers={}, activeDomain=null, currentTab='compose', isDark=true, saveTimer=null;
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+let vars=[], answers={}, activeDomain=null, currentTab='compose', isDark=true;
+let saveTimer=null, history_list=[], chatHistory=[], deepAskActive=false;
+let outputEditable=false;
 
-// ═══════════════ DEEP ASK STATE ═══════════════
-let chatHistory = [];
-let deepAskActive = false;
+// ════════════════════════════════════════
+// SECURITY: API KEY
+// ════════════════════════════════════════
+function getApiKey(){ return localStorage.getItem('pb_gemini_key')||''; }
+function getModel(){ return localStorage.getItem('pb_gemini_model')||'gemini-2.0-flash'; }
+function openApiModal(){
+  const saved=getApiKey();
+  if(saved) document.getElementById('apiKeyInput').value=saved;
+  document.getElementById('modelSelect').value=getModel();
+  document.getElementById('apiModal').classList.add('show');
+}
+function closeApiModal(){ document.getElementById('apiModal').classList.remove('show'); }
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  const m=document.getElementById('modelSelect').value;
+  if(!k){ toast('API key tidak boleh kosong'); return; }
+  localStorage.setItem('pb_gemini_key',k);
+  localStorage.setItem('pb_gemini_model',m);
+  closeApiModal();
+  toast('API key & model disimpan ✓');
+}
 
-// ═══════════════ API KEY ═══════════════
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  localStorage.setItem('gemini_api_key', key);
-  toast('API Key disimpan ✅');
-}
-function getApiKey() {
-  return localStorage.getItem('gemini_api_key') || '';
-}
-function loadApiKey() {
-  const saved = getApiKey();
-  if(saved) document.getElementById('apiKeyInput').value = saved;
+// ════════════════════════════════════════
+// DEEP ASK — fixed: proper model, error handling
+// ════════════════════════════════════════
+async function callGemini(messages, retries=2){
+  const key=getApiKey();
+  const model=getModel();
+  if(!key) throw new Error('no_key');
+  for(let attempt=0;attempt<=retries;attempt++){
+    try{
+      const res=await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {method:'POST',headers:{'Content-Type':'application/json'},
+         body:JSON.stringify({contents:messages,generationConfig:{temperature:0.7,maxOutputTokens:1500}})}
+      );
+      if(!res.ok){
+        const err=await res.json().catch(()=>({}));
+        const code=err.error?.status||res.status;
+        throw new Error(`API error ${code}: ${err.error?.message||res.statusText}`);
+      }
+      const data=await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    } catch(e){
+      if(attempt===retries) throw e;
+      await new Promise(r=>setTimeout(r,1000*(attempt+1)));
+    }
+  }
 }
 
-// ═══════════════ DEEP ASK FUNCTIONS ═══════════════
-async function startDeepAsk() {
-  const apiKey = getApiKey();
-  if (!apiKey) { toast('Masukkan Gemini API Key dulu di pojok kanan atas!'); return; }
-  const intent = document.getElementById('intentInput').value.trim();
-  if (!intent) { toast('Tulis dulu ide awalnya di kolom!'); return; }
-  
+function addBubble(role,text){
+  const msgs=document.getElementById('chatMsgs');
+  const div=document.createElement('div');
+  div.className=`cbubble ${role} fadein`;
+  div.textContent=text;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+function showTyping(){
+  const msgs=document.getElementById('chatMsgs');
+  const t=document.createElement('div');
+  t.className='typing';t.id='typing';
+  t.innerHTML='<span></span><span></span><span></span>';
+  msgs.appendChild(t);msgs.scrollTop=msgs.scrollHeight;
+}
+function hideTyping(){ document.getElementById('typing')?.remove(); }
+
+async function startDeepAsk(){
+  const key=getApiKey();
+  if(!key){ openApiModal(); toast('Set API Key dulu'); return; }
+  const intent=document.getElementById('intentInput').value.trim();
+  if(!intent){ toast('Tulis ide awalnya dulu'); return; }
   document.getElementById('chatPanel').classList.add('show');
-  document.getElementById('chatMessages').innerHTML = '';
-  chatHistory = [];
-  deepAskActive = true;
-  
-  const systemPrompt = `Kamu adalah Prompt Engineer Expert. Tugasmu mengobrol dengan user untuk memahami kebutuhannya, lalu merancang prompt terbaik.
-Lakukan:
-1. Sapa singkat.
-2. Analisis intent user: "${intent}".
-3. Ajukan pertanyaan penting (maks 5) untuk klarifikasi: tujuan, audiens, tone, format, constraints, referensi.
-4. Setelah diskusi cukup, buatkan konfigurasi prompt. Akhiri dengan "PROMPT_READY" diikuti spesifikasi:
+  document.getElementById('chatMsgs').innerHTML='';
+  chatHistory=[];deepAskActive=true;
+  const sys=`Kamu adalah Prompt Engineer Expert. Tugasmu membantu user menyempurnakan kebutuhannya lalu membuatkan konfigurasi prompt terbaik.
+Intent user: "${intent}"
+Langkah:
+1. Sapa singkat, analisis intent.
+2. Ajukan maksimal 4 pertanyaan klarifikasi (tujuan, audiens, tone, constraints).
+3. Setelah cukup info, ketik PROMPT_READY diikuti:
 SYSTEM: ...
 USER: ...
-TONE: ... (pilih dari Professional, Santai, Teknikal, Ringkas, Detail, Persuasif, Empati)
-FORMAT: ... (Plain text, Markdown, JSON, Kode saja, Step-by-step, Tabel)
-REASONING: ... (Standard, Think step by step, Chain of thought, Pros & cons)
-CONSTRAINTS: ...
-Pastikan kamu hanya menulis format itu setelah PROMPT_READY.`;
-  
-  chatHistory.push({ role: 'user', parts: [{ text: `[SYSTEM]: ${systemPrompt}` }] });
-  chatHistory.push({ role: 'model', parts: [{ text: 'Halo! Gue siap bantu bikin prompt yang pas. Ceritakan lebih detail tentang kebutuhan lo ya.' }] });
-  
-  addChatBubble('ai', 'Halo! Gue siap bantu bikin prompt yang pas. Ceritakan lebih detail tentang kebutuhan lo ya.');
+TONE: (Professional|Santai|Teknikal|Ringkas|Detail|Persuasif|Empati)
+FORMAT: (Plain text|Markdown|JSON|Kode saja|Step-by-step|Tabel)
+REASONING: (Standard|Think step by step|Chain of thought|Pros & cons)
+CONSTRAINTS: ...`;
+  chatHistory=[
+    {role:'user',parts:[{text:sys}]},
+    {role:'model',parts:[{text:'Halo! Gue siap bantu racik prompt yang tepat. Cerita lebih detail dulu ya.'}]}
+  ];
+  addBubble('ai','Halo! Gue siap bantu racik prompt yang tepat. Cerita lebih detail dulu ya.');
 }
 
-function addChatBubble(sender, text) {
-  const div = document.createElement('div');
-  div.className = `chat-bubble ${sender}`;
-  div.textContent = text;
-  document.getElementById('chatMessages').appendChild(div);
-  div.scrollIntoView({ behavior: 'smooth' });
-}
-
-async function sendChatMessage() {
-  const input = document.getElementById('chatUserInput');
-  const msg = input.value.trim();
-  if (!msg || !deepAskActive) return;
-  
-  addChatBubble('user', msg);
-  chatHistory.push({ role: 'user', parts: [{ text: msg }] });
-  input.value = '';
-  
-  const apiKey = getApiKey();
-  if (!apiKey) { toast('API key missing'); return; }
-  
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: chatHistory,
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
-        })
-      }
-    );
-    const data = await response.json();
-    const reply = data.candidates[0].content.parts[0].text;
-    
-    chatHistory.push({ role: 'model', parts: [{ text: reply }] });
-    addChatBubble('ai', reply);
-    
-    if (reply.includes('PROMPT_READY')) {
-      deepAskActive = false;
-      parseAndApplyConfig(reply);
+async function sendChat(){
+  if(!deepAskActive) return;
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg) return;
+  addBubble('user',msg);
+  chatHistory.push({role:'user',parts:[{text:msg}]});
+  input.value='';
+  showTyping();
+  try{
+    const reply=await callGemini(chatHistory);
+    hideTyping();
+    chatHistory.push({role:'model',parts:[{text:reply}]});
+    addBubble('ai',reply);
+    if(reply.includes('PROMPT_READY')){
+      deepAskActive=false;
+      parseAndApply(reply);
     }
-  } catch (err) {
-    addChatBubble('ai', 'Maaf, terjadi error. Cek API key atau koneksi.');
+  } catch(e){
+    hideTyping();
+    const msg2=e.message==='no_key'?'API key belum diset. Klik tombol 🔑 API di header.'
+      :`Error: ${e.message}`;
+    addBubble('ai',msg2);
   }
 }
 
-function parseAndApplyConfig(text) {
-  const parts = text.split('PROMPT_READY');
-  if (parts.length < 2) return;
-  const configBlock = parts[1];
-  
-  const config = {};
-  const lines = configBlock.split('\n');
-  let currentKey = null;
-  for (const line of lines) {
-    const match = line.match(/^(SYSTEM|USER|TONE|FORMAT|REASONING|CONSTRAINTS)\s*:\s*(.*)$/i);
-    if (match) {
-      currentKey = match[1].toUpperCase();
-      config[currentKey] = match[2].trim();
-    } else if (currentKey) {
-      config[currentKey] += '\n' + line.trim();
-    }
-  }
-  
-  if (config.SYSTEM) document.getElementById('systemPrompt').value = config.SYSTEM.trim();
-  if (config.USER) document.getElementById('userPrompt').value = config.USER.trim();
-  if (config.TONE) document.getElementById('tone').value = config.TONE;
-  if (config.FORMAT) document.getElementById('outputFormat').value = config.FORMAT;
-  if (config.REASONING) document.getElementById('reasoning').value = config.REASONING;
-  if (config.CONSTRAINTS) document.getElementById('constraintPrompt').value = config.CONSTRAINTS.trim();
-  
-  updateCharCount();
-  toast('Prompt udah diracik dan diisi ke editor! 🎉');
-}
-
-// ═══════════════ ORIGINAL FUNCTIONS (lengkap) ═══════════════
-function sendToAI(ai) {
-  let text = '';
-  if (currentTab === 'output') {
-    text = document.getElementById('outputBox').value;
-  } else {
-    const c = compilePrompt();
-    text = (c.system ? '[SYSTEM]\n' + c.system + '\n\n' : '') + '[USER]\n' + c.user;
-  }
-  if (!text || text.trim() === 'Prompt yang di-generate akan muncul di sini.') {
-    toast('Generate dulu prompt-nya!');
-    return;
-  }
-  navigator.clipboard.writeText(text).then(() => {
-    toast('✅ Prompt disalin! Paste (Ctrl+V) di ' + ai.toUpperCase());
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    toast('✅ Prompt disalin! Paste (Ctrl+V) di ' + ai.toUpperCase());
+function parseAndApply(text){
+  const block=text.split('PROMPT_READY').slice(1).join('');
+  const cfg={};let cur=null;
+  block.split('\n').forEach(line=>{
+    const m=line.match(/^(SYSTEM|USER|TONE|FORMAT|REASONING|CONSTRAINTS)\s*:\s*(.*)$/i);
+    if(m){cur=m[1].toUpperCase();cfg[cur]=(cfg[cur]||'')+m[2].trim();}
+    else if(cur) cfg[cur]+=' '+line.trim();
   });
-  const urls = {
-    chatgpt: 'https://chat.openai.com/',
-    deepseek: 'https://chat.deepseek.com/',
-    claude: 'https://claude.ai/',
-    gemini: 'https://gemini.google.com/app',
-    grok: 'https://x.com/i/grok'
-  };
-  window.open(urls[ai] || urls.chatgpt, '_blank');
+  if(cfg.SYSTEM) document.getElementById('systemPrompt').value=cfg.SYSTEM.trim();
+  if(cfg.USER) document.getElementById('userPrompt').value=cfg.USER.trim();
+  if(cfg.TONE){
+    const sel=document.getElementById('tone');
+    const opt=[...sel.options].find(o=>o.value.toLowerCase()===cfg.TONE.toLowerCase().trim());
+    if(opt) sel.value=opt.value;
+  }
+  if(cfg.FORMAT){
+    const sel=document.getElementById('outputFormat');
+    const opt=[...sel.options].find(o=>o.value.toLowerCase()===cfg.FORMAT.toLowerCase().trim());
+    if(opt) sel.value=opt.value;
+  }
+  if(cfg.REASONING){
+    const sel=document.getElementById('reasoning');
+    const opt=[...sel.options].find(o=>o.value.toLowerCase()===cfg.REASONING.toLowerCase().trim());
+    if(opt) sel.value=opt.value;
+  }
+  if(cfg.CONSTRAINTS) document.getElementById('constraintPrompt').value=cfg.CONSTRAINTS.trim();
+  autoDetectVars(); // FIXED: sync vars setelah apply
+  updateStats();
+  toast('Prompt sudah diisi ke editor! ✓');
 }
 
-function toggleTheme(){
-  isDark=!isDark;
-  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
-  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
-  scheduleSave();
-}
-function openSidebar(){
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('overlay').classList.add('show');
-}
-function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-}
-function toast(msg,duration=2000){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),duration);
-}
-function loadTemplate(i,btn){
-  document.querySelectorAll('.tmpl-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const t=TEMPLATES[i];
-  document.getElementById('systemPrompt').value=t.sys;
-  document.getElementById('userPrompt').value=t.user;
-  document.getElementById('contextPrompt').value=t.ctx;
-  document.getElementById('constraintPrompt').value=t.cons;
-  document.getElementById('outputFormat').value=t.format;
-  document.getElementById('tone').value=t.tone;
-  document.getElementById('reasoning').value=t.reasoning;
-  vars=t.vars.map(v=>({...v}));
-  renderVars();
-  updateCharCount();
-  scheduleSave();
-  toast('Template "'+t.name+'" dimuat');
-}
-function insertBlock(text){
-  const ta=document.getElementById('userPrompt');
-  const pos=ta.selectionStart!==undefined?ta.selectionStart:ta.value.length;
-  ta.value=ta.value.slice(0,pos)+text+ta.value.slice(pos);
-  ta.focus();
-  ta.selectionStart=ta.selectionEnd=pos+text.length;
-  ta.classList.add('blinked');
-  setTimeout(()=>ta.classList.remove('blinked'),600);
-  autoDetectVarsFromText();
-  updateCharCount();
-  if(currentTab==='preview') renderPreview();
-  scheduleSave();
-  toast('Block ditambahkan ✓');
-}
-function renderVars(){
-  const c=document.getElementById('varRows');
-  c.innerHTML='';
-  vars.forEach((v,i)=>{
-    const row=document.createElement('div');
-    row.className='var-row';
-    row.innerHTML=`
-      <input value="${escHtml(v.k)}" placeholder="nama_var" oninput="onVarNameChange(${i},this)">
-      <input value="${escHtml(v.v)}" placeholder="nilai" oninput="vars[${i}].v=this.value;updateCharCount();if(currentTab==='preview')renderPreview();scheduleSave()">
-      <button class="del-btn" onclick="removeVar(${i})">×</button>`;
-    c.appendChild(row);
+// ════════════════════════════════════════
+// CORE PROMPT LOGIC
+// ════════════════════════════════════════
+function subsVars(text){
+  let out=text;
+  vars.forEach(v=>{
+    if(!v.k||!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(v.k)) return;
+    out=out.replace(new RegExp('\\{\\{'+v.k+'\\}\\}','g'),v.v||'{{'+v.k+'}}');
   });
+  return out;
 }
-function onVarNameChange(i,input){
-  const val=input.value;
-  const valid=/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(val)||val==='';
-  input.classList.toggle('invalid',!valid);
-  if(valid) vars[i].k=val;
-  updateCharCount();
-  if(currentTab==='preview') renderPreview();
-  scheduleSave();
+function compilePrompt(){
+  let sys=document.getElementById('systemPrompt').value;
+  let user=document.getElementById('userPrompt').value;
+  let ctx=document.getElementById('contextPrompt').value;
+  let cons=document.getElementById('constraintPrompt').value;
+  const fmt=document.getElementById('outputFormat').value;
+  const tone=document.getElementById('tone').value;
+  const reasoning=document.getElementById('reasoning').value;
+  [sys,user,ctx,cons]=[sys,user,ctx,cons].map(subsVars);
+  if(tone!=='Professional') sys+=(sys?'\n\n':'')+`Tone: ${tone}.`;
+  const rMap={'Think step by step':'Think step by step sebelum menjawab.','Chain of thought':'Tunjukkan chain of thought sebelum jawaban final.','Pros & cons':'Paparkan pros dan cons sebelum menyimpulkan.'};
+  if(rMap[reasoning]) sys+='\n\n'+rMap[reasoning];
+  if(fmt!=='Plain text') sys+=`\n\nFormat respons: ${fmt}.`;
+  if(cons) sys+='\n\nBatasan:\n'+cons;
+  let fullUser=user;
+  if(ctx) fullUser+='\n\nKonteks:\n'+ctx;
+  return {system:sys.trim(),user:fullUser.trim()};
 }
-function addVar(){vars.push({k:'var_baru',v:''});renderVars();}
-function removeVar(i){vars.splice(i,1);renderVars();scheduleSave();}
-function autoDetectVarsFromText(){
-  const texts=[
-    document.getElementById('systemPrompt').value,
-    document.getElementById('userPrompt').value,
-    document.getElementById('contextPrompt').value,
-    document.getElementById('constraintPrompt').value,
-  ].join(' ');
-  const matches=texts.match(/\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g)||[];
-  const found=new Set(matches.map(m=>m.slice(2,-2)));
-  let added=false;
-  found.forEach(key=>{if(!vars.find(v=>v.k===key)){vars.push({k:key,v:''});added=true;}});
-  if(added) renderVars();
+function updateStats(){
+  const {system,user}=compilePrompt();
+  const chars=system.length+user.length;
+  const tokens=Math.round(chars/4);
+  document.getElementById('charBadge').textContent=`${chars.toLocaleString()} chars · ~${tokens.toLocaleString()} tokens`;
+  const tb=document.getElementById('tokenBadge');
+  if(chars>0){
+    tb.style.display='';
+    tb.innerHTML=`~<span>${tokens.toLocaleString()}</span> tokens`;
+  } else tb.style.display='none';
 }
+
 function detectDomain(text){
   const t=' '+text.toLowerCase()+' ';
   const scores={};
   for(const [k,d] of Object.entries(DOMAINS)){
     if(k==='umum') continue;
     let score=0;
-    for(const kw of (d.kw||[])){if(t.includes(kw)) score+=kw.split(' ').length*2;}
-    for(const pat of (d.pat||[])){if(pat.test(t)) score+=3;}
+    for(const kw of(d.kw||[])) if(t.includes(kw)) score+=kw.split(' ').length*2;
+    for(const pat of(d.pat||[])) if(pat.test(t)) score+=3;
     scores[k]=score;
   }
   const best=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
-  return (best && best[1]>0) ? best[0] : 'umum';
+  return(best&&best[1]>0)?best[0]:'umum';
 }
 function onIntentInput(val){
   if(!val.trim()){document.getElementById('domainTag').innerHTML='';return;}
   const dk=detectDomain(val);
   const d=DOMAINS[dk];
-  document.getElementById('domainTag').innerHTML=`<span class="domain-tag" style="background:${d.bg};color:${d.color}">⚡ Terdeteksi: ${d.label}</span>`;
+  document.getElementById('domainTag').innerHTML=
+    `<span class="domain-tag" style="background:${d.bg};color:${d.color}">⚡ ${d.label}</span>`;
 }
 function detectAndShow(){
   const val=document.getElementById('intentInput').value.trim();
   if(!val){toast('Tulis dulu apa yang mau dibuat!');return;}
-  activeDomain=detectDomain(val);
-  answers={};
+  activeDomain=detectDomain(val);answers={};
   renderQuestions(activeDomain);
   document.getElementById('questionsArea').classList.add('show');
   document.getElementById('aiNotice').style.display='flex';
@@ -801,9 +981,8 @@ function renderQuestions(dk){
       const row=div.querySelector('.chip-row');
       q.opts.forEach(opt=>{
         const c=document.createElement('button');
-        c.className='q-chip';
-        c.textContent=opt;
-        c.onclick=()=>{row.querySelectorAll('.q-chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');answers[q.id]=opt;};
+        c.className='qchip';c.textContent=opt;
+        c.onclick=()=>{row.querySelectorAll('.qchip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');answers[q.id]=opt;};
         row.appendChild(c);
       });
     } else {
@@ -812,96 +991,235 @@ function renderQuestions(dk){
     }
   });
 }
-function applyAnswersToEditor(){
+
+function buildSmartPrompt(){
+  const intent=subsVars(document.getElementById('intentInput').value.trim());
+  if(!intent||!activeDomain) return null;
+  const dk=activeDomain;let system='',user='';
+  if(dk==='app'){
+    const stack=answers.stack||'bebas',u=answers.user||'umum',scope=answers.scope||'MVP',detail=answers.detail||'';
+    system='Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun.';
+    user=`Bantu saya membuat ${intent}.\n\nSpesifikasi:\n- Stack: ${stack}\n- Target pengguna: ${u}\n- Scope: ${scope}${detail?'\n- Detail: '+detail:''}\n\nButuhkan:\n1. Breakdown fitur\n2. Arsitektur sistem\n3. Struktur folder\n4. Langkah implementasi bertahap\n5. Contoh kode\n\nLangsung eksekusi.`;
+  } else if(dk==='artikel'){
+    const audience=answers.audience||'umum',tone=answers.tone||'santai',length=answers.length||'sedang',detail=answers.detail||'';
+    system='Kamu adalah content writer profesional. Tulis dengan engaging, konkret, tanpa basa-basi.';
+    user=`Tulis artikel tentang ${intent}.\n\nTarget: ${audience}\nTone: ${tone}\nPanjang: ${length}${detail?'\nAngle: '+detail:''}\n\nStruktur: Hook kuat → isi → data/contoh → penutup.`;
+  } else if(dk==='lagu'){
+    const genre=answers.genre||'Pop',mood=answers.mood||'bebas',output=answers.output||'Full lirik',detail=answers.detail||'';
+    system='Kamu adalah songwriter profesional. HANYA tulis lirik — jangan cerita, jangan analisis. Mulai dari [Verse 1].';
+    user=`Tulis ${output} lagu ${genre} tentang: ${intent}\nMood: ${mood}${detail?'\nCerita: '+detail:''}\n\nMULAI DARI [Verse 1]:`;
+  } else if(dk==='video'){
+    const platform=answers.platform||'YouTube',duration=answers.duration||'5-15 menit',style=answers.style||'edukatif',detail=answers.detail||'';
+    system='Kamu adalah scriptwriter video profesional.';
+    user=`Buat script ${style} tentang ${intent} untuk ${platform}.\nDurasi: ${duration}${detail?'\nDetail: '+detail:''}\n\nSertakan hook, visual cues, dan CTA.`;
+  } else {
+    const goal=answers.goal||'buat dari nol',output=answers.output||'bebas',detail=answers.detail||'';
+    system='Kamu adalah expert di bidang relevan. Langsung ke inti, jangan bertele-tele.';
+    user=`Tugas: ${intent}\nTujuan: ${goal}\nFormat: ${output}${detail?'\nInfo: '+detail:''}\n\nJawaban komprehensif dan konkret.`;
+  }
+  return{system:system.trim(),user:user.trim()};
+}
+
+function applyAnswers(){
   const smart=buildSmartPrompt();
   if(!smart) return;
   document.getElementById('systemPrompt').value=smart.system;
   document.getElementById('userPrompt').value=smart.user;
   switchTab('compose',document.querySelector('.tab-btn'));
-  updateCharCount();
+  autoDetectVars();updateStats();
   if(currentTab==='preview') renderPreview();
-  scheduleSave();
-  toast('Jawaban diterapkan ke editor ✓');
+  scheduleSave();toast('Jawaban diterapkan ✓');
 }
-function substituteVars(text){
-  let out=text;
-  vars.forEach(v=>{
-    if(!v.k||!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(v.k)) return;
-    const re=new RegExp('\\{\\{'+v.k+'\\}\\}','g');
-    out=out.replace(re,v.v||'{{'+v.k+'}}');
-  });
-  return out;
-}
-function compilePrompt(){
-  let sys=document.getElementById('systemPrompt').value;
-  let user=document.getElementById('userPrompt').value;
-  let ctx=document.getElementById('contextPrompt').value;
-  let cons=document.getElementById('constraintPrompt').value;
-  const fmt=document.getElementById('outputFormat').value;
-  const tone=document.getElementById('tone').value;
-  const reasoning=document.getElementById('reasoning').value;
-  sys=substituteVars(sys);user=substituteVars(user);ctx=substituteVars(ctx);cons=substituteVars(cons);
-  if(tone!=='Professional') sys+=(sys?'\n\n':'')+`Tone: ${tone}.`;
-  if(reasoning!=='Standard') sys+='\n\n'+(reasoning==='Think step by step'?'Think step by step sebelum menjawab.':reasoning==='Chain of thought'?'Tunjukkan chain of thought sebelum jawaban final.':'Paparkan pros dan cons sebelum menyimpulkan.');
-  if(fmt!=='Plain text') sys+=`\n\nFormat respons: ${fmt}.`;
-  if(cons) sys+='\n\nBatasan:\n'+cons;
-  let fullUser=user;
-  if(ctx) fullUser+='\n\nKonteks:\n'+ctx;
-  return {system:sys.trim(),user:fullUser.trim()};
-}
-function updateCharCount(){
-  const {system,user}=compilePrompt();
-  document.getElementById('charBadge').textContent=(system.length+user.length).toLocaleString()+' chars';
-}
-function buildSmartPrompt(){
-  const intent=substituteVars(document.getElementById('intentInput').value.trim());
-  if(!intent||!activeDomain) return null;
-  const dk=activeDomain;
-  let system='',user='';
-  if(dk==='app'){
-    const stack=answers.stack||'bebas', u=answers.user||'end user umum', scope=answers.scope||'MVP', detail=answers.detail||'';
-    system=`Kamu adalah senior software engineer dan product architect berpengalaman 10+ tahun membangun aplikasi production-grade.`;
-    user=`Tugas kamu: Bantu saya membuat ${intent}.\n\nSpesifikasi teknis:\n- Tech stack: ${stack}\n- Target pengguna: ${u}\n- Scope: ${scope}${detail?'\n- Detail: '+detail:''}\n\nYang saya butuhkan:\n1. Breakdown fitur utama\n2. Arsitektur sistem\n3. Struktur folder / project\n4. Langkah implementasi bertahap\n5. Contoh kode\n\nJANGAN menjelaskan bahwa kamu AI. Langsung eksekusi.`;
-  } else if(dk==='artikel'){
-    const audience=answers.audience||'umum', tone=answers.tone||'santai', length=answers.length||'sedang', detail=answers.detail||'';
-    system=`Kamu adalah content writer profesional. Tulis dengan engaging, konkret, tanpa basa-basi.`;
-    user=`Tulis artikel tentang ${intent}.\n\nTarget: ${audience}\nTone: ${tone}\nPanjang: ${length}${detail?'\nAngle: '+detail:''}\n\nStruktur: Hook kuat → isi → data/contoh → penutup.`;
-  } else if(dk==='lagu'){
-    const genre=answers.genre||'Pop', mood=answers.mood||'bebas', output=answers.output||'Full lirik', detail=answers.detail||'';
-    system=`Kamu adalah songwriter profesional. HANYA tulis lirik — jangan cerita, jangan analisis. Mulai langsung dari [Verse 1].`;
-    user=`Tulis ${output} lagu ${genre} tentang: ${intent}\nMood: ${mood}${detail?'\nCerita: '+detail:''}\n\nMULAI SEKARANG DARI [Verse 1]:`;
-  } else if(dk==='video'){
-    const platform=answers.platform||'YouTube', duration=answers.duration||'5-15 menit', style=answers.style||'edukatif', detail=answers.detail||'';
-    system=`Kamu adalah scriptwriter video profesional.`;
-    user=`Buat script video ${style} tentang ${intent} untuk ${platform}.\nDurasi: ${duration}${detail?'\nDetail: '+detail:''}\n\nSertakan hook, visual cues, dan CTA.`;
-  } else if(dk==='desain'){
-    const type=answers.type||'UI/UX', style=answers.style||'modern', tool=answers.tool||'Figma', detail=answers.detail||'';
-    system=`Kamu adalah senior designer.`;
-    user=`Bantu desain ${intent}.\nJenis: ${type}\nGaya: ${style}\nTool: ${tool}${detail?'\nDetail: '+detail:''}\n\nBerikan: konsep, color palette, typography, layout, komponen UI.`;}
-  else {
-    const goal=answers.goal||'buat dari nol', output=answers.output||'bebas', detail=answers.detail||'';
-    system=`Kamu adalah expert di bidang yang relevan. Langsung ke inti, jangan bertele-tele.`;
-    user=`Tugas: ${intent}\nTujuan: ${goal}\nFormat: ${output}${detail?'\nInfo: '+detail:''}\n\nBeri jawaban komprehensif dan konkret.`;
-  }
-  return {system:system.trim(),user:user.trim()};
-}
+
 function generatePrompt(){
   const btn=document.getElementById('genBtn');
-  btn.disabled=true;btn.textContent='⏳ Loading...';
+  btn.disabled=true;btn.textContent='⏳...';
   setTimeout(()=>{
     const smart=buildSmartPrompt();
     let sys,usr;
     if(smart){sys=smart.system;usr=smart.user;}
     else{const c=compilePrompt();sys=c.system;usr=c.user;}
-    const output=document.getElementById('outputBox');
-    output.value=(sys?'[SYSTEM]\n'+sys+'\n\n':'')+'[USER]\n'+usr;
+    const out=document.getElementById('outputBox');
+    const txt=(sys?'[SYSTEM]\n'+sys+'\n\n':'')+'[USER]\n'+usr;
+    out.value=txt;
+    out.readOnly=true;out.classList.remove('editable');
+    outputEditable=false;
+    document.getElementById('editToggle').textContent='✎ Edit';
+    const chars=txt.length,tokens=Math.round(chars/4);
     document.getElementById('outputMeta').innerHTML=
-      `<span>${(sys.length+usr.length).toLocaleString()} chars</span><span style="margin-left:auto"><button class="sec-btn" style="font-size:11px" onclick="copyActive()">Copy prompt</button></span>`;
+      `<span>${chars.toLocaleString()} chars · ~${tokens.toLocaleString()} tokens</span>`;
     switchTab('output',document.querySelectorAll('.tab-btn')[2]);
     document.getElementById('aiNotice').style.display='flex';
+    saveToHistory(txt);
     btn.disabled=false;btn.textContent='⚡ Generate';
     toast('Prompt berhasil di-generate ✓');
-  },150);
+  },100);
+}
+
+// ════════════════════════════════════════
+// OUTPUT EDIT TOGGLE
+// ════════════════════════════════════════
+function toggleEditOutput(){
+  const ob=document.getElementById('outputBox');
+  const et=document.getElementById('editToggle');
+  outputEditable=!outputEditable;
+  ob.readOnly=!outputEditable;
+  ob.classList.toggle('editable',outputEditable);
+  et.textContent=outputEditable?'✓ Done':'✎ Edit';
+  if(outputEditable){ob.focus();toast('Mode edit aktif — kamu bisa edit langsung ✓');}
+  else toast('Edit selesai ✓');
+}
+
+// ════════════════════════════════════════
+// HISTORY — prompt versioning
+// ════════════════════════════════════════
+function saveToHistory(text){
+  const entry={text,ts:Date.now(),preview:text.slice(0,60)};
+  history_list.unshift(entry);
+  if(history_list.length>10) history_list.pop();
+  renderHistory();
+  try{localStorage.setItem('pb_history',JSON.stringify(history_list));}catch(e){}
+}
+function loadHistory(){
+  try{const raw=localStorage.getItem('pb_history');if(raw) history_list=JSON.parse(raw);}catch(e){}
+  renderHistory();
+}
+function renderHistory(){
+  const c=document.getElementById('histList');
+  c.innerHTML='';
+  if(!history_list.length){c.innerHTML='<div style="font-size:10px;color:var(--text3);font-family:var(--mono)">Belum ada history</div>';return;}
+  history_list.forEach((h,i)=>{
+    const btn=document.createElement('button');
+    btn.className='hist-item';
+    const d=new Date(h.ts);
+    btn.innerHTML=`<div>${esc(h.preview)}...</div><div class="hist-time">${d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</div>`;
+    btn.onclick=()=>{
+      document.getElementById('outputBox').value=h.text;
+      document.getElementById('outputBox').readOnly=true;
+      outputEditable=false;
+      switchTab('output',document.querySelectorAll('.tab-btn')[2]);
+      toast(`History #${i+1} dimuat`);
+    };
+    c.appendChild(btn);
+  });
+}
+function clearHistory(){
+  history_list=[];renderHistory();
+  localStorage.removeItem('pb_history');toast('History dihapus');
+}
+
+// ════════════════════════════════════════
+// EXPORT / IMPORT
+// ════════════════════════════════════════
+function openExportModal(){ document.getElementById('exportModal').classList.add('show'); }
+function getState(){
+  return{
+    intent:document.getElementById('intentInput').value,
+    sys:document.getElementById('systemPrompt').value,
+    user:document.getElementById('userPrompt').value,
+    ctx:document.getElementById('contextPrompt').value,
+    cons:document.getElementById('constraintPrompt').value,
+    format:document.getElementById('outputFormat').value,
+    tone:document.getElementById('tone').value,
+    reasoning:document.getElementById('reasoning').value,
+    vars,isDark,
+  };
+}
+function exportAs(type){
+  const state=getState();
+  if(type==='json'){
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='prompt-config.json';a.click();
+    toast('JSON berhasil di-export ✓');
+  } else if(type==='txt'){
+    const {system,user}=compilePrompt();
+    const txt=(system?'[SYSTEM]\n'+system+'\n\n':'')+'[USER]\n'+user;
+    const blob=new Blob([txt],{type:'text/plain'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='prompt.txt';a.click();
+    toast('TXT berhasil di-export ✓');
+  } else if(type==='url'){
+    const encoded=btoa(encodeURIComponent(JSON.stringify(state)));
+    const url=window.location.href.split('?')[0]+'?pb='+encoded;
+    navigator.clipboard.writeText(url).then(()=>toast('Shareable URL di-copy ✓')).catch(()=>toast('Copy manual: '+url));
+  } else if(type==='import'){
+    const input=document.createElement('input');input.type='file';input.accept='.json';
+    input.onchange=e=>{
+      const file=e.target.files[0];if(!file) return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        try{
+          const s=JSON.parse(ev.target.result);
+          restoreState(s);toast('JSON berhasil di-import ✓');
+        } catch{toast('File JSON tidak valid');}
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+  document.getElementById('exportModal').classList.remove('show');
+}
+
+// ════════════════════════════════════════
+// VARS
+// ════════════════════════════════════════
+function renderVars(){
+  const c=document.getElementById('varRows');c.innerHTML='';
+  vars.forEach((v,i)=>{
+    const row=document.createElement('div');row.className='var-row';
+    row.innerHTML=`
+      <input value="${esc(v.k)}" placeholder="nome_var" oninput="onVarChange(${i},'k',this)">
+      <input value="${esc(v.v)}" placeholder="nilai" oninput="onVarChange(${i},'v',this)">
+      <button class="delbtn" onclick="removeVar(${i})">×</button>`;
+    c.appendChild(row);
+  });
+}
+function onVarChange(i,field,input){
+  if(field==='k'){
+    const valid=/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(input.value)||input.value==='';
+    input.classList.toggle('invalid',!valid);
+    if(valid) vars[i].k=input.value;
+  } else vars[i].v=input.value;
+  updateStats();if(currentTab==='preview') renderPreview();scheduleSave();
+}
+function addVar(){vars.push({k:'var_baru',v:''});renderVars();}
+function removeVar(i){vars.splice(i,1);renderVars();scheduleSave();}
+function autoDetectVars(){
+  const texts=['systemPrompt','userPrompt','contextPrompt','constraintPrompt'].map(id=>document.getElementById(id).value).join(' ');
+  const found=new Set((texts.match(/\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g)||[]).map(m=>m.slice(2,-2)));
+  let added=false;
+  found.forEach(key=>{if(!vars.find(v=>v.k===key)){vars.push({k:key,v:''});added=true;}});
+  if(added) renderVars();
+}
+
+// ════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════
+function sendToAI(ai){
+  let text=document.getElementById('outputBox').value;
+  if(!text||text==='Prompt yang di-generate akan muncul di sini.'){
+    const{system,user}=compilePrompt();
+    text=(system?'[SYSTEM]\n'+system+'\n\n':'')+'[USER]\n'+user;
+  }
+  if(!text.trim()){toast('Generate dulu prompt-nya!');return;}
+  const copy=t=>navigator.clipboard.writeText(t).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});
+  copy(text);
+  const urls={chatgpt:'https://chat.openai.com/',deepseek:'https://chat.deepseek.com/',claude:'https://claude.ai/',gemini:'https://gemini.google.com/app',grok:'https://x.com/i/grok'};
+  toast(`✓ Prompt disalin! Paste di ${ai.toUpperCase()}`);
+  window.open(urls[ai]||urls.chatgpt,'_blank');
+}
+function toggleTheme(){
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  scheduleSave();
+}
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+function toast(msg,dur=2200){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
 }
 function switchTab(name,btn){
   currentTab=name;
@@ -912,27 +1230,53 @@ function switchTab(name,btn){
   if(name==='preview') renderPreview();
 }
 function renderPreview(){
-  const {system,user}=compilePrompt();
+  const{system,user}=compilePrompt();
   let html='';
-  if(system) html+=`<span class="preview-sys">[SYSTEM]\n${escHtml(system)}</span>\n\n`;
-  html+=`<span class="preview-usr">[USER]\n${escHtml(user)}</span>`;
+  if(system) html+=`<span class="p-sys">[SYSTEM]\n${esc(system)}</span>\n\n`;
+  html+=`<span class="p-usr">[USER]\n${esc(user)}</span>`;
   document.getElementById('previewBox').innerHTML=html;
 }
 function copyActive(){
   let text='';
   if(currentTab==='output') text=document.getElementById('outputBox').value;
-  else {const {system,user}=compilePrompt();text=(system?'[SYSTEM]\n'+system+'\n\n':'')+'[USER]\n'+user;}
-  if(!text||text.trim()==='Prompt yang di-generate akan muncul di sini.'){toast('Belum ada prompt!');return;}
-  navigator.clipboard.writeText(text).then(()=>toast('Prompt di-copy ✓')).catch(()=>toast('Gagal copy, coba manual.'));
+  else{const{system,user}=compilePrompt();text=(system?'[SYSTEM]\n'+system+'\n\n':'')+'[USER]\n'+user;}
+  if(!text||text==='Prompt yang di-generate akan muncul di sini.'){toast('Belum ada prompt!');return;}
+  navigator.clipboard.writeText(text).then(()=>toast('Prompt di-copy ✓')).catch(()=>toast('Gagal copy — coba manual.'));
+}
+function loadTemplate(i,btn){
+  document.querySelectorAll('.tmpl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const t=TEMPLATES[i];
+  document.getElementById('systemPrompt').value=t.sys;
+  document.getElementById('userPrompt').value=t.user;
+  document.getElementById('contextPrompt').value=t.ctx;
+  document.getElementById('constraintPrompt').value=t.cons;
+  document.getElementById('outputFormat').value=t.format;
+  document.getElementById('tone').value=t.tone;
+  document.getElementById('reasoning').value=t.reasoning;
+  vars=t.vars.map(v=>({...v}));renderVars();
+  updateStats();scheduleSave();
+  toast(`Template "${t.name}" dimuat`);
+}
+function insertBlock(text){
+  const ta=document.getElementById('userPrompt');
+  const pos=ta.selectionStart!==undefined?ta.selectionStart:ta.value.length;
+  ta.value=ta.value.slice(0,pos)+text+ta.value.slice(pos);
+  ta.focus();ta.selectionStart=ta.selectionEnd=pos+text.length;
+  ta.classList.add('blinked');setTimeout(()=>ta.classList.remove('blinked'),600);
+  autoDetectVars();updateStats();
+  if(currentTab==='preview') renderPreview();
+  scheduleSave();toast('Block ditambahkan ✓');
 }
 function resetAll(){
   document.getElementById('intentInput').value='';
   document.getElementById('domainTag').innerHTML='';
   document.getElementById('questionsArea').classList.remove('show');
   document.getElementById('aiNotice').style.display='none';
+  document.getElementById('tokenBadge').style.display='none';
   document.getElementById('outputBox').value='Prompt yang di-generate akan muncul di sini.';
   document.getElementById('outputMeta').innerHTML='';
-  document.getElementById('previewBox').textContent='Preview akan update otomatis saat kamu edit...';
+  document.getElementById('previewBox').textContent='Preview akan update otomatis...';
   document.getElementById('systemPrompt').value='';
   document.getElementById('userPrompt').value='';
   document.getElementById('contextPrompt').value='';
@@ -940,33 +1284,31 @@ function resetAll(){
   document.getElementById('outputFormat').value='Plain text';
   document.getElementById('tone').value='Professional';
   document.getElementById('reasoning').value='Standard';
-  vars=[];renderVars();
-  activeDomain=null;answers={};
-  updateCharCount();
+  document.getElementById('chatPanel').classList.remove('show');
+  document.getElementById('chatMsgs').innerHTML='';
+  chatHistory=[];deepAskActive=false;
+  vars=[];renderVars();activeDomain=null;answers={};
+  outputEditable=false;
+  document.getElementById('outputBox').readOnly=true;
+  document.getElementById('outputBox').classList.remove('editable');
+  document.getElementById('editToggle').textContent='✎ Edit';
+  updateStats();
   document.querySelectorAll('.tmpl-btn').forEach(b=>b.classList.remove('active'));
-  localStorage.removeItem('pb_state');
-  toast('Semua direset');
+  localStorage.removeItem('pb_state');toast('Semua direset');
 }
-function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveToStorage,800);}
-function saveToStorage(){
+
+// ════════════════════════════════════════
+// AUTOSAVE
+// ════════════════════════════════════════
+function scheduleSave(){
+  document.getElementById('autosave').innerHTML='<span class="save-dot" style="background:var(--amber)"></span>Menyimpan...';
+  clearTimeout(saveTimer);saveTimer=setTimeout(saveState,800);
+}
+function saveState(){
   try{
-    const state={
-      intent:document.getElementById('intentInput').value,
-      sys:document.getElementById('systemPrompt').value,
-      user:document.getElementById('userPrompt').value,
-      ctx:document.getElementById('contextPrompt').value,
-      cons:document.getElementById('constraintPrompt').value,
-      format:document.getElementById('outputFormat').value,
-      tone:document.getElementById('tone').value,
-      reasoning:document.getElementById('reasoning').value,
-      vars,isDark,
-    };
-    localStorage.setItem('pb_state',JSON.stringify(state));
-    document.getElementById('autosaveIndicator').innerHTML='<span class="dot2"></span>Tersimpan';
-  }catch(e){}
-}
-function loadFromStorage(){
-  try{const raw=localStorage.getItem('pb_state');return raw?JSON.parse(raw):null;}catch(e){return null;}
+    localStorage.setItem('pb_state',JSON.stringify(getState()));
+    document.getElementById('autosave').innerHTML='<span class="save-dot"></span>Tersimpan';
+  } catch(e){document.getElementById('autosave').innerHTML='<span class="save-dot" style="background:var(--coral)"></span>Gagal simpan';}
 }
 function restoreState(s){
   document.getElementById('intentInput').value=s.intent||'';
@@ -977,75 +1319,93 @@ function restoreState(s){
   if(s.format) document.getElementById('outputFormat').value=s.format;
   if(s.tone) document.getElementById('tone').value=s.tone;
   if(s.reasoning) document.getElementById('reasoning').value=s.reasoning;
-  vars=s.vars||[];renderVars();
+  vars=(s.vars||[]).map(v=>({...v}));renderVars();
   isDark=s.isDark!==undefined?s.isDark:true;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
   if(s.intent) onIntentInput(s.intent);
-  updateCharCount();
+  updateStats();
 }
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// ═══════════════ INIT ═══════════════
+// ════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey){
+    if(e.key==='Enter'){e.preventDefault();generatePrompt();}
+    else if(e.key==='C'&&e.shiftKey){e.preventDefault();copyActive();}
+    else if(e.key==='k'){e.preventDefault();document.getElementById('intentInput').value='';document.getElementById('domainTag').innerHTML='';toast('Intent direset');}
+    else if(e.key==='e'){e.preventDefault();if(currentTab==='output') toggleEditOutput();}
+    else if(e.key==='1'){e.preventDefault();switchTab('compose',document.querySelectorAll('.tab-btn')[0]);}
+    else if(e.key==='2'){e.preventDefault();switchTab('preview',document.querySelectorAll('.tab-btn')[1]);}
+    else if(e.key==='3'){e.preventDefault();switchTab('output',document.querySelectorAll('.tab-btn')[2]);}
+  }
+});
+
+// ════════════════════════════════════════
+// CHECK URL IMPORT
+// ════════════════════════════════════════
+function checkUrlImport(){
+  const params=new URLSearchParams(window.location.search);
+  const pb=params.get('pb');
+  if(pb){
+    try{
+      const s=JSON.parse(decodeURIComponent(atob(pb)));
+      restoreState(s);toast('Config dimuat dari URL ✓');
+    } catch{console.warn('URL import failed');}
+  }
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
 function init(){
+  // Templates
   const tg=document.getElementById('tmplGrid');
-  const cats={dev:'⚙️ Developer',konten:'✍️ Konten',musik:'🎵 Musik',bisnis:'💼 Bisnis',edukasi:'🎓 Edukasi',misc:'✨ Lainnya'};
+  const cats={dev:'Developer',konten:'Konten',musik:'Musik',bisnis:'Bisnis',edukasi:'Edukasi',misc:'Lainnya'};
   let lastCat=null;
   TEMPLATES.forEach((t,i)=>{
     if(t.cat!==lastCat){
       lastCat=t.cat;
-      const lbl=document.createElement('div');
-      lbl.style.cssText='font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:8px 2px 4px;margin-top:4px';
-      lbl.textContent=cats[t.cat]||t.cat;
+      const lbl=document.createElement('div');lbl.className='cat-lbl';lbl.textContent=cats[t.cat]||t.cat;
       tg.appendChild(lbl);
     }
-    const b=document.createElement('button');
-    b.className='tmpl-btn'+(i===0?' active':'');
-    b.setAttribute('data-tip',t.desc);
-    b.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-name">${t.name}</span><span class="t-desc">${t.desc}</span>`;
-    b.onclick=()=>loadTemplate(i,b);
-    tg.appendChild(b);
+    const b=document.createElement('button');b.className='tmpl-btn'+(i===0?' active':'');
+    b.innerHTML=`<span class="tmpl-icon">${t.icon}</span><span class="tmpl-info"><span class="t-name">${t.name}</span><span class="t-desc">${t.desc}</span></span>`;
+    b.onclick=()=>loadTemplate(i,b);tg.appendChild(b);
   });
+
+  // Blocks
   const bc=document.getElementById('blockChips');
   BLOCKS.forEach(bl=>{
-    const c=document.createElement('button');
-    c.className='block-chip';
-    c.setAttribute('data-tip','Insert '+bl.label+' block ke user prompt');
+    const c=document.createElement('button');c.className='bchip';
     c.innerHTML=`<span class="dot" style="background:${bl.color}"></span>${bl.label}`;
-    c.onclick=()=>insertBlock(bl.text);
-    bc.appendChild(c);
+    c.onclick=()=>insertBlock(bl.text);bc.appendChild(c);
   });
 
-  // load api key
-  loadApiKey();
-
-  // load saved state
-  const saved=loadFromStorage();
-  if(saved){
-    restoreState(saved);
-  } else {
-    loadTemplate(0,document.querySelector('.tmpl-btn'));
-  }
-
+  // Field listeners
   ['systemPrompt','userPrompt','contextPrompt','constraintPrompt'].forEach(id=>{
     document.getElementById(id).addEventListener('input',()=>{
-      updateCharCount();
-      autoDetectVarsFromText();
-      if(currentTab==='preview') renderPreview();
-      scheduleSave();
+      updateStats();autoDetectVars();
+      if(currentTab==='preview') renderPreview();scheduleSave();
     });
   });
   ['outputFormat','tone','reasoning'].forEach(id=>{
     document.getElementById(id).addEventListener('change',()=>{
-      updateCharCount();
-      if(currentTab==='preview') renderPreview();
-      scheduleSave();
+      updateStats();if(currentTab==='preview') renderPreview();scheduleSave();
     });
   });
 
-  updateCharCount();
-}
+  // Load
+  checkUrlImport();
+  const saved=localStorage.getItem('pb_state');
+  if(saved){try{restoreState(JSON.parse(saved));}catch{loadTemplate(0,document.querySelector('.tmpl-btn'));}}
+  else loadTemplate(0,document.querySelector('.tmpl-btn'));
 
+  loadHistory();
+  updateStats();
+}
 init();
 </script>
 </body>
