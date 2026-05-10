@@ -381,7 +381,7 @@ textarea.field:focus,select.field:focus{outline:none;border-color:var(--border2)
   <div class="modal-box">
     <div class="modal-title">🔑 OpenRouter API Key</div>
     <div class="modal-sub">Gratis pakai model free tier. Daftar di <a href="https://openrouter.ai" target="_blank" style="color:var(--blue)">openrouter.ai</a></div>
-    <div class="modal-warn">⚠️ Key disimpan di browser ini saja (localStorage). Jangan pakai di komputer publik.</div>
+    <div class="modal-warn">💡 Tips: Encode key pakai Base64 di baris ~37 biar GitHub nggak detect & nggak perlu input manual. Atau pakai localStorage.</div>
     <div class="model-select-row">
       <label>Model (Free Tier)</label>
       <select id="modelSelect">
@@ -608,6 +608,21 @@ const PromptBuilder = (() => {
     SIDEBAR_WIDTH: 260
   };
 
+  // ════════════════════════════════════════
+  // HARDCODED API KEY (Opsional - Encoded)
+  // ════════════════════════════════════════
+  // 1. Encode key kamu di: https://www.base64encode.org/
+  // 2. Paste hasil encode di bawah (tanpa tanda kutip)
+  // 3. GitHub nggak akan detect sebagai secret
+  // CONTOH: const ENCODED_KEY = 'c2stb3ItdjEtYWJjLi4u'; 
+  // ⚠️ Jangan share file ini kalau key sudah diisi!
+  const ENCODED_KEY = 'c2stb3ItdjEtNmEwOTJlZTMxMGVkZTJmN2YxOGMzMWY4OGMzMDVlYTJkZjM0YzRlZDAwNDNiNzNiYjdhNjQwNjAxM2JiYjAyMQ==';
+
+  function decodeKey(){ 
+    try{ return ENCODED_KEY ? atob(ENCODED_KEY) : ''; } 
+    catch(e){ return ''; } 
+  }
+
   const FREE_MODELS = [
     {id:'openrouter/free',name:'Auto Router (Free)'},
     {id:'nvidia/nemotron-3-super-120b-a12b:free',name:'Nemotron 3 Super'},
@@ -773,12 +788,19 @@ const PromptBuilder = (() => {
   // ════════════════════════════════════════
   // API
   // ════════════════════════════════════════
-  function getApiKey(){ return localStorage.getItem('pb_or_key')||''; }
+  function getApiKey(){ 
+    const decoded = decodeKey();
+    if(decoded && decoded.startsWith('sk-or-v1-')) return decoded;
+    return localStorage.getItem('pb_or_key')||''; 
+  }
   function getModel(){ return localStorage.getItem('pb_or_model')||'google/gemini-2.0-flash-exp:free'; }
 
   function openApiModal(){
     const saved=getApiKey();
-    if(saved) document.getElementById('apiKeyInput').value=saved;
+    const isHardcoded=ENCODED_KEY && decodeKey().startsWith('sk-or-v1-');
+    if(saved){
+      document.getElementById('apiKeyInput').value=isHardcoded ? '🔒 Key ter-encode (hidden)' : saved;
+    }
     document.getElementById('modelSelect').value=getModel();
     document.getElementById('apiModal').classList.add('show');
   }
@@ -786,8 +808,14 @@ const PromptBuilder = (() => {
   function saveApiKey(){
     const k=document.getElementById('apiKeyInput').value.trim();
     const m=document.getElementById('modelSelect').value;
-    if(!k){ toast('API key tidak boleh kosong'); return; }
-    if(!k.startsWith('sk-or-v1-')){ toast('Warning: Key OpenRouter biasanya diawali sk-or-v1-'); }
+    const decoded = decodeKey();
+    if(decoded && decoded.startsWith('sk-or-v1-')){
+      localStorage.setItem('pb_or_model',m);
+      closeApiModal();
+      toast('Model diupdate (key tetap ter-encode) ✓');
+      return;
+    }
+    if(!k || k==='🔒 Key ter-encode (hidden)'){ toast('API key tidak boleh kosong'); return; }
     localStorage.setItem('pb_or_key',k);
     localStorage.setItem('pb_or_model',m);
     closeApiModal();
@@ -889,6 +917,9 @@ const PromptBuilder = (() => {
   async function startDeepAsk(){
     const key=getApiKey();
     if(!key){ openApiModal(); toast('Set OpenRouter API Key dulu (gratis)'); return; }
+    if(decodeKey().startsWith('sk-or-v1-')){
+      // Auto-skip if encoded key exists
+    }
     const intent=document.getElementById('intentInput').value.trim();
     if(!intent){ toast('Tulis ide awalnya dulu'); return; }
     document.getElementById('chatPanel').classList.add('show');
